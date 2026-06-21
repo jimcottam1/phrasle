@@ -236,8 +236,9 @@ document.getElementById('btn-stats-end').addEventListener('click', openStats);
 function openModal(id)  { document.getElementById(id).hidden = false; }
 function closeModal(id) { document.getElementById(id).hidden = true; }
 
-document.getElementById('btn-how').addEventListener('click',   () => openModal('modal-how'));
-document.getElementById('close-how').addEventListener('click', () => closeModal('modal-how'));
+document.getElementById('btn-how').addEventListener('click',    () => openModal('modal-how'));
+document.getElementById('close-how').addEventListener('click',  () => closeModal('modal-how'));
+document.getElementById('btn-got-it').addEventListener('click', () => closeModal('modal-how'));
 document.getElementById('btn-stats').addEventListener('click', openStats);
 document.getElementById('close-stats').addEventListener('click', () => closeModal('modal-stats'));
 

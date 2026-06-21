@@ -258,6 +258,7 @@ body {
 .btn:hover { background: var(--border); }
 .btn--primary { background: var(--green); border-color: var(--green); color: #fff; }
 .btn--primary:hover { background: var(--green-light); }
+.btn--full { width: 100%; margin-top: 20px; padding: 14px; font-size: 1rem; }
 
 /* ---- Modal ---- */
 .modal-backdrop {
