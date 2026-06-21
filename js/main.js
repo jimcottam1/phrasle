@@ -24,6 +24,8 @@ let state = {
 
 let shareText = '';
 
+const KEYBOARD_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+
 // ---------------------------------------------------------------------------
 // Restore saved state
 // ---------------------------------------------------------------------------
@@ -85,8 +87,6 @@ function renderLives() {
     row.appendChild(pip);
   }
 }
-
-const KEYBOARD_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
 function renderKeyboard() {
   const container = document.getElementById('keyboard');
