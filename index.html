@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Phrasle — guess the daily phrase one letter at a time.">
+  <meta name="theme-color" content="#121213">
+  <title>Phrasle</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <header class="header">
+    <span class="header-title">Phrasle</span>
+    <div class="header-btns">
+      <button class="icon-btn" id="btn-how" aria-label="How to play" title="How to play">?</button>
+      <button class="icon-btn" id="btn-stats" aria-label="Statistics" title="Statistics">📊</button>
+    </div>
+  </header>
+
+  <div class="hint-banner">
+    <div class="hint-label">
+      <span class="hint-category-tag" id="hint-category"></span>
+    </div>
+    <div class="hint-date" id="hint-date"></div>
+  </div>
+
+  <div class="phrase-container">
+    <div class="phrase-words" id="phrase-display"></div>
+  </div>
+
+  <div class="lives-row" id="lives-row"></div>
+
+  <div class="keyboard-container" id="keyboard"></div>
+
+  <div class="end-panel" id="end-panel" hidden>
+    <div class="end-title" id="end-title"></div>
+    <div class="end-sub" id="end-sub"></div>
+    <div class="end-btns">
+      <button class="btn btn--primary" id="btn-share">Share 📋</button>
+      <button class="btn" id="btn-stats-end">Stats 📊</button>
+    </div>
+  </div>
+
+  <!-- How to play modal -->
+  <div class="modal-backdrop" id="modal-how" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-how-title">
+      <button class="modal-close" id="close-how" aria-label="Close">✕</button>
+      <h2 class="modal-title" id="modal-how-title">How to Play</h2>
+      <div class="how-step"><span class="how-emoji">🔤</span><span class="how-text">A hidden phrase is shown as blank tiles. <strong>Guess one letter at a time</strong> using the keyboard.</span></div>
+      <div class="how-step"><span class="how-emoji">🟩</span><span class="how-text"><strong>Green tiles</strong> — the letter appears in the phrase and is revealed in every position.</span></div>
+      <div class="how-step"><span class="how-emoji">⬛</span><span class="how-text"><strong>Dark keys</strong> — that letter is not in the phrase. You lose one life.</span></div>
+      <div class="how-step"><span class="how-emoji">❤️</span><span class="how-text">You have <strong>6 lives</strong>. Too many wrong guesses and it's game over.</span></div>
+      <div class="how-step"><span class="how-emoji">💡</span><span class="how-text">The category is shown as a hint. A new phrase every day!</span></div>
+    </div>
+  </div>
+
+  <!-- Stats modal -->
+  <div class="modal-backdrop" id="modal-stats" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-stats-title">
+      <button class="modal-close" id="close-stats" aria-label="Close">✕</button>
+      <h2 class="modal-title" id="modal-stats-title">Statistics</h2>
+      <div id="stats-content"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
