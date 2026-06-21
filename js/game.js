@@ -39,8 +39,9 @@ export function makeGuess(letter, state, phrase) {
 // ---------------------------------------------------------------------------
 
 export function buildShareText(phraseObj, wrongCount, won, dateStr) {
-  const result = won ? `✅ ${wrongCount} wrong` : `❌ Too many wrong guesses`;
-  return `Phrasle ${dateStr} — ${phraseObj.category}\n${phraseObj.phrase}\n${result}`;
+  const pattern = phraseObj.phrase.split(' ').map(w => '□'.repeat(w.length)).join('  ');
+  const result  = won ? `✅ Solved — ${wrongCount} wrong guess${wrongCount !== 1 ? 'es' : ''}` : `❌ Too many wrong guesses`;
+  return `Phrasle ${dateStr} — ${phraseObj.category}\n${pattern}\n${result}`;
 }
 
 // ---------------------------------------------------------------------------

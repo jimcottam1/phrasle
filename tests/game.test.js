@@ -150,8 +150,16 @@ describe('makeGuess', () => {
 describe('buildShareText', () => {
   const phraseObj = { phrase: 'BITE THE BULLET', category: 'Idiom' };
 
-  it('includes the phrase', () => {
-    expect(buildShareText(phraseObj, 2, true, '21 Jun')).toContain('BITE THE BULLET');
+  it('does not include the answer phrase', () => {
+    expect(buildShareText(phraseObj, 2, true, '21 Jun')).not.toContain('BITE THE BULLET');
+  });
+
+  it('includes a word-length pattern instead', () => {
+    // BITE=4, THE=3, BULLET=6 → □□□□  □□□  □□□□□□
+    const text = buildShareText(phraseObj, 2, true, '21 Jun');
+    expect(text).toContain('□□□□');
+    expect(text).toContain('□□□');
+    expect(text).toContain('□□□□□□');
   });
 
   it('includes the category', () => {
