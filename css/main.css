@@ -315,6 +315,13 @@ body {
 .how-text  { color: var(--text-muted); line-height: 1.5; }
 .how-text strong { color: var(--text); }
 
+.build-info {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--border);
+}
+
 /* Stats */
 .stats-grid {
   display: grid;
@@ -351,14 +358,6 @@ body {
 .toast--visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
-}
-
-/* ---- Version ---- */
-.version {
-  margin-top: auto;
-  padding: 12px;
-  font-size: 0.7rem;
-  color: var(--border);
 }
 
 /* ---- Responsive ---- */

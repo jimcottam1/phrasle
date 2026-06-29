@@ -34,7 +34,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Inject commit SHA as version
-        run: sed -i "s/__VERSION__/$(git rev-parse --short HEAD)/g" index.html
+        run: |
+          sed -i "s/__VERSION__/$(git rev-parse --short HEAD)/g" index.html
+          sed -i "s/__BUILD_DATE__/$(date +'%-d %b %Y')/g" index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
