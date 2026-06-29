@@ -354,15 +354,32 @@ function difficulty(p) {
 
 const SORTED_PHRASES = [...PHRASES].sort((a, b) => difficulty(a) - difficulty(b));
 
-// Day 0 = 2026-06-29 (when difficulty cycling was introduced).
-// Cycles through phrases from easiest to hardest, then repeats.
+// Split into three equal difficulty tiers.
+const TIER_SIZE = Math.floor(SORTED_PHRASES.length / 3);
+const EASY   = SORTED_PHRASES.slice(0, TIER_SIZE);
+const MEDIUM = SORTED_PHRASES.slice(TIER_SIZE, TIER_SIZE * 2);
+const HARD   = SORTED_PHRASES.slice(TIER_SIZE * 2);
+
+// Pattern repeats every 5 days: Easy, Easy, Medium, Easy, Hard.
+// Easy slots within each 5-day cycle: positions 0, 1, 3 → indices 0, 1, 2.
+const PATTERN        = ['easy', 'easy', 'medium', 'easy', 'hard'];
+const EASY_SLOT_IDX  = [0, 1, -1, 2, -1]; // which easy phrase to use at each pattern position
+
+// Day 0 = 2026-06-29.
 const EPOCH = new Date('2026-06-29T00:00:00');
 
 export function getTodayPhrase() {
-  const today    = new Date();
+  const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const epoch    = new Date(EPOCH);
+  const epoch = new Date(EPOCH);
   epoch.setHours(0, 0, 0, 0);
   const dayIndex = Math.floor((today - epoch) / 86400000);
-  return SORTED_PHRASES[((dayIndex % SORTED_PHRASES.length) + SORTED_PHRASES.length) % SORTED_PHRASES.length];
+
+  const cycle = Math.floor(dayIndex / 5);
+  const pos   = dayIndex % 5;
+  const tier  = PATTERN[pos];
+
+  if (tier === 'easy')   return EASY[(cycle * 3 + EASY_SLOT_IDX[pos]) % EASY.length];
+  if (tier === 'medium') return MEDIUM[cycle % MEDIUM.length];
+  return HARD[cycle % HARD.length];
 }
