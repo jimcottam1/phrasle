@@ -86,6 +86,19 @@ body {
   margin-top: 5px;
 }
 
+.hint-difficulty {
+  display: inline-block;
+  border-radius: 99px;
+  padding: 5px 14px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-left: 8px;
+}
+.hint-difficulty--easy   { background: #1a3a1a; color: #6aaa64; border: 1px solid #538d4e; }
+.hint-difficulty--medium { background: #3a2e00; color: #f0c040; border: 1px solid #a07800; }
+.hint-difficulty--hard   { background: #3a1a1a; color: #e07070; border: 1px solid #b53333; }
+
 /* ---- Phrase display ---- */
 .phrase-container {
   width: 100%;

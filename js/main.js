@@ -9,9 +9,12 @@ import {
 // ---------------------------------------------------------------------------
 
 const phraseObj = getTodayPhrase();
-const { phrase, category } = phraseObj;
+const { phrase, category, tier } = phraseObj;
 
 document.getElementById('hint-category').textContent = category;
+const diffEl = document.getElementById('hint-difficulty');
+diffEl.textContent = tier;
+diffEl.className = `hint-difficulty hint-difficulty--${tier.toLowerCase()}`;
 document.getElementById('hint-date').textContent =
   new Date().toLocaleDateString('en-IE', { weekday: 'long', day: 'numeric', month: 'long' });
 

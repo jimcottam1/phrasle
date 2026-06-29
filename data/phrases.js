@@ -379,7 +379,8 @@ export function getTodayPhrase() {
   const pos   = dayIndex % 5;
   const tier  = PATTERN[pos];
 
-  if (tier === 'easy')   return EASY[(cycle * 3 + EASY_SLOT_IDX[pos]) % EASY.length];
-  if (tier === 'medium') return MEDIUM[cycle % MEDIUM.length];
-  return HARD[cycle % HARD.length];
+  const phrase = tier === 'easy'   ? EASY[(cycle * 3 + EASY_SLOT_IDX[pos]) % EASY.length]
+               : tier === 'medium' ? MEDIUM[cycle % MEDIUM.length]
+               :                     HARD[cycle % HARD.length];
+  return { ...phrase, tier: tier.charAt(0).toUpperCase() + tier.slice(1) };
 }
