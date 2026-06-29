@@ -33,6 +33,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Inject commit SHA as version
+        run: sed -i "s/__VERSION__/$(git rev-parse --short HEAD)/g" index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
