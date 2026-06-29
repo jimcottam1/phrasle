@@ -353,6 +353,14 @@ body {
   transform: translateX(-50%) translateY(0);
 }
 
+/* ---- Version ---- */
+.version {
+  margin-top: auto;
+  padding: 12px;
+  font-size: 0.7rem;
+  color: var(--border);
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 480px) {
   .header-title { font-size: 1.2rem; }
