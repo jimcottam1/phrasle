@@ -336,8 +336,33 @@ export const PHRASES = [
   { phrase: 'ONE TWO BUCKLE MY SHOE THREE FOUR KNOCK AT THE DOOR', category: 'Nursery Rhyme' },
 ];
 
+// Letters ranked by frequency in English (E=most common, Z=rarest).
+// Difficulty score = avg rank of unique letters + 0.3 per letter in phrase.
+// Higher score = harder.
+const LETTER_RANK = {
+  E:1,  T:2,  A:3,  O:4,  I:5,  N:6,  S:7,  H:8,  R:9,  D:10,
+  L:11, U:12, C:13, M:14, F:15, Y:16, W:17, G:18, P:19, B:20,
+  V:21, K:22, X:23, Q:24, J:25, Z:26
+};
+
+function difficulty(p) {
+  const letters = p.phrase.replace(/[^A-Z]/g, '');
+  const unique  = [...new Set(letters)];
+  const avgRank = unique.reduce((s, l) => s + (LETTER_RANK[l] ?? 20), 0) / unique.length;
+  return avgRank + letters.length * 0.3;
+}
+
+const SORTED_PHRASES = [...PHRASES].sort((a, b) => difficulty(a) - difficulty(b));
+
+// Day 0 = 2026-06-29 (when difficulty cycling was introduced).
+// Cycles through phrases from easiest to hardest, then repeats.
+const EPOCH = new Date('2026-06-29T00:00:00');
+
 export function getTodayPhrase() {
-  const today = new Date();
-  const seed  = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-  return PHRASES[seed % PHRASES.length];
+  const today    = new Date();
+  today.setHours(0, 0, 0, 0);
+  const epoch    = new Date(EPOCH);
+  epoch.setHours(0, 0, 0, 0);
+  const dayIndex = Math.floor((today - epoch) / 86400000);
+  return SORTED_PHRASES[((dayIndex % SORTED_PHRASES.length) + SORTED_PHRASES.length) % SORTED_PHRASES.length];
 }
