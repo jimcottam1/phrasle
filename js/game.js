@@ -41,7 +41,7 @@ export function makeGuess(letter, state, phrase) {
 export function buildShareText(phraseObj, wrongCount, won, dateStr) {
   const pattern = phraseObj.phrase.split(' ').map(w => '□'.repeat(w.length)).join('  ');
   const result  = won ? `✅ Solved — ${wrongCount} wrong guess${wrongCount !== 1 ? 'es' : ''}` : `❌ Too many wrong guesses`;
-  return `Phrasle ${dateStr} — ${phraseObj.category}\n${pattern}\n${result}`;
+  return `Phrasle ${dateStr} — ${phraseObj.category}\n${pattern}\n${result}\nPlay today's Phrasle! https://jimcottam1.github.io/phrasle/`;
 }
 
 // ---------------------------------------------------------------------------
