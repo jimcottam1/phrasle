@@ -220,7 +220,16 @@ function showEndPanel() {
 // Share
 // ---------------------------------------------------------------------------
 
-document.getElementById('btn-share').addEventListener('click', () => {
+document.getElementById('btn-share').addEventListener('click', async () => {
+  if (navigator.share) {
+    try {
+      await navigator.share({ text: shareText });
+    } catch (err) {
+      if (err.name !== 'AbortError') showToast(shareText);
+    }
+    return;
+  }
+
   if (navigator.clipboard) {
     navigator.clipboard.writeText(shareText)
       .then(() => showToast('Copied to clipboard!'))

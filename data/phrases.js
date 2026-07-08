@@ -356,9 +356,28 @@ const SORTED_PHRASES = [...PHRASES].sort((a, b) => difficulty(a) - difficulty(b)
 
 // Split into three equal difficulty tiers.
 const TIER_SIZE = Math.floor(SORTED_PHRASES.length / 3);
-const EASY   = SORTED_PHRASES.slice(0, TIER_SIZE);
-const MEDIUM = SORTED_PHRASES.slice(TIER_SIZE, TIER_SIZE * 2);
-const HARD   = SORTED_PHRASES.slice(TIER_SIZE * 2);
+
+// Reorder a tier so consecutive picks cycle through categories instead of
+// clustering (e.g. short common-letter Idioms all sorting to the front).
+// Each category keeps its internal difficulty order; we just interleave them.
+function roundRobinByCategory(phrases) {
+  const queues = new Map();
+  for (const p of phrases) {
+    if (!queues.has(p.category)) queues.set(p.category, []);
+    queues.get(p.category).push(p);
+  }
+  let remaining = [...queues.values()];
+  const result = [];
+  while (remaining.length > 0) {
+    for (const queue of remaining) result.push(queue.shift());
+    remaining = remaining.filter((queue) => queue.length > 0);
+  }
+  return result;
+}
+
+const EASY   = roundRobinByCategory(SORTED_PHRASES.slice(0, TIER_SIZE));
+const MEDIUM = roundRobinByCategory(SORTED_PHRASES.slice(TIER_SIZE, TIER_SIZE * 2));
+const HARD   = roundRobinByCategory(SORTED_PHRASES.slice(TIER_SIZE * 2));
 
 // Pattern repeats every 5 days: Easy, Easy, Medium, Easy, Hard.
 // Easy slots within each 5-day cycle: positions 0, 1, 3 → indices 0, 1, 2.
