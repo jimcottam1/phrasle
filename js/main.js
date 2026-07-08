@@ -220,8 +220,14 @@ function showEndPanel() {
 // Share
 // ---------------------------------------------------------------------------
 
+// Desktop browsers' native share sheet (Windows/macOS) is sparse — no
+// WhatsApp/Twitter/etc, just "Nearby Share" or Mail — so it's worse than
+// copying to clipboard. Only use navigator.share on actual mobile devices,
+// where the share sheet is full of real targets.
+const isMobile = navigator.userAgentData?.mobile ?? /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
 document.getElementById('btn-share').addEventListener('click', async () => {
-  if (navigator.share) {
+  if (navigator.share && isMobile) {
     try {
       await navigator.share({ text: shareText });
     } catch (err) {
