@@ -334,6 +334,114 @@ export const PHRASES = [
   { phrase: 'STAR LIGHT STAR BRIGHT FIRST STAR I SEE TONIGHT', category: 'Nursery Rhyme' },
   { phrase: 'JACK BE NIMBLE JACK BE QUICK',        category: 'Nursery Rhyme' },
   { phrase: 'ONE TWO BUCKLE MY SHOE THREE FOUR KNOCK AT THE DOOR', category: 'Nursery Rhyme' },
+
+  // Idiom
+  { phrase: 'ADD FUEL TO THE FIRE',                category: 'Idiom'         },
+  { phrase: 'BITE YOUR TONGUE',                    category: 'Idiom'         },
+  { phrase: 'CALL IT A DAY',                       category: 'Idiom'         },
+  { phrase: 'CUT CORNERS',                         category: 'Idiom'         },
+  { phrase: 'DRAW A BLANK',                        category: 'Idiom'         },
+  { phrase: 'GET COLD FEET',                       category: 'Idiom'         },
+  { phrase: 'GO THE EXTRA MILE',                   category: 'Idiom'         },
+  { phrase: 'HANG IN THERE',                       category: 'Idiom'         },
+
+  // Proverb
+  { phrase: 'A WATCHED POT NEVER BOILS',           category: 'Proverb'       },
+  { phrase: 'ABSENCE MAKES THE HEART GROW FONDER', category: 'Proverb'       },
+  { phrase: 'CURIOSITY KILLED THE CAT',            category: 'Proverb'       },
+  { phrase: 'EVERY DOG HAS ITS DAY',               category: 'Proverb'       },
+  { phrase: 'HASTE MAKES WASTE',                   category: 'Proverb'       },
+  { phrase: 'IF IT AINT BROKE DONT FIX IT',        category: 'Proverb'       },
+
+  // Movie Quote
+  { phrase: 'LIFE FINDS A WAY',                    category: 'Movie Quote'   },
+  { phrase: 'MY PRECIOUS',                         category: 'Movie Quote'   },
+  { phrase: 'YOU SHALL NOT PASS',                  category: 'Movie Quote'   },
+  { phrase: 'GREED IS GOOD',                       category: 'Movie Quote'   },
+  { phrase: 'E T PHONE HOME',                      category: 'Movie Quote'   },
+  { phrase: 'THIS IS SPARTA',                      category: 'Movie Quote'   },
+  { phrase: 'HOW YOU LIKE THEM APPLES',            category: 'Movie Quote'   },
+
+  // Shakespeare
+  { phrase: 'THOUGH SHE BE BUT LITTLE SHE IS FIERCE', category: 'Shakespeare' },
+  { phrase: 'THE PLAY IS THE THING',                category: 'Shakespeare'  },
+  { phrase: 'COWARDS DIE MANY TIMES BEFORE THEIR DEATHS', category: 'Shakespeare' },
+  { phrase: 'UNEASY LIES THE HEAD THAT WEARS A CROWN', category: 'Shakespeare' },
+  { phrase: 'THE FAULT IS NOT IN OUR STARS',       category: 'Shakespeare'  },
+  { phrase: 'A HORSE A HORSE MY KINGDOM FOR A HORSE', category: 'Shakespeare' },
+  { phrase: 'FRIENDS ROMANS COUNTRYMEN LEND ME YOUR EARS', category: 'Shakespeare' },
+  { phrase: 'ET TU BRUTE',                         category: 'Shakespeare'  },
+
+  // Famous Saying
+  { phrase: 'THAT WHICH DOES NOT KILL US MAKES US STRONGER', category: 'Famous Saying' },
+  { phrase: 'THE ONLY CONSTANT IN LIFE IS CHANGE', category: 'Famous Saying' },
+  { phrase: 'IN THE MIDDLE OF DIFFICULTY LIES OPPORTUNITY', category: 'Famous Saying' },
+  { phrase: 'STAY HUNGRY STAY FOOLISH',            category: 'Famous Saying' },
+
+  // TV Quote
+  { phrase: 'BAZINGA',                             category: 'TV Quote'      },
+  { phrase: 'THATS WHAT SHE SAID',                 category: 'TV Quote'      },
+  { phrase: 'LEGEN WAIT FOR IT DARY',               category: 'TV Quote'      },
+  { phrase: 'DID I DO THAT',                       category: 'TV Quote'      },
+  { phrase: 'WUBBA LUBBA DUB DUB',                 category: 'TV Quote'      },
+  { phrase: 'THIS IS THE WAY',                     category: 'TV Quote'      },
+  { phrase: 'NO SOUP FOR YOU',                     category: 'TV Quote'      },
+  { phrase: 'YABBA DABBA DOO',                     category: 'TV Quote'      },
+
+  // Sports
+  { phrase: 'ITS NOT WHETHER YOU GET KNOCKED DOWN ITS WHETHER YOU GET UP', category: 'Sports' },
+  { phrase: 'FORM IS TEMPORARY CLASS IS PERMANENT', category: 'Sports'       },
+  { phrase: 'CHAMPIONS KEEP PLAYING UNTIL THEY GET IT RIGHT', category: 'Sports' },
+  { phrase: 'HARD WORK BEATS TALENT WHEN TALENT DOESNT WORK HARD', category: 'Sports' },
+  { phrase: 'THE ONLY EASY DAY WAS YESTERDAY',     category: 'Sports'        },
+  { phrase: 'ITS A MARATHON NOT A SPRINT',         category: 'Sports'        },
+  { phrase: 'SECOND PLACE IS FIRST LOSER',         category: 'Sports'        },
+  { phrase: 'PRESSURE IS A PRIVILEGE',             category: 'Sports'        },
+  { phrase: 'DEFENSE WINS CHAMPIONSHIPS',          category: 'Sports'        },
+  { phrase: 'THERE IS NO OFFSEASON',               category: 'Sports'        },
+
+  // Advert Slogan
+  { phrase: 'EAT FRESH',                           category: 'Advert Slogan' },
+  { phrase: 'THE QUICKER PICKER UPPER',            category: 'Advert Slogan' },
+  { phrase: 'MAYBE SHES BORN WITH IT MAYBE ITS MAYBELLINE', category: 'Advert Slogan' },
+  { phrase: 'BETCHA CANT EAT JUST ONE',            category: 'Advert Slogan' },
+
+  // Nursery Rhyme
+  { phrase: 'POP GOES THE WEASEL',                 category: 'Nursery Rhyme' },
+  { phrase: 'PAT A CAKE PAT A CAKE BAKERS MAN',    category: 'Nursery Rhyme' },
+  { phrase: 'THIS LITTLE PIGGY WENT TO MARKET',    category: 'Nursery Rhyme' },
+  { phrase: 'SING A SONG OF SIXPENCE',             category: 'Nursery Rhyme' },
+  { phrase: 'WEE WILLIE WINKIE RUNS THROUGH THE TOWN', category: 'Nursery Rhyme' },
+  { phrase: 'RAIN RAIN GO AWAY COME AGAIN ANOTHER DAY', category: 'Nursery Rhyme' },
+
+  // Song Lyric
+  { phrase: 'SWEET DREAMS ARE MADE OF THIS',        category: 'Song Lyric'    },
+  { phrase: 'I WANNA DANCE WITH SOMEBODY WHO LOVES ME', category: 'Song Lyric' },
+  { phrase: 'DONT GO BREAKING MY HEART',            category: 'Song Lyric'    },
+  { phrase: 'I GET KNOCKED DOWN BUT I GET UP AGAIN', category: 'Song Lyric'   },
+  { phrase: 'ITS MY LIFE ITS NOW OR NEVER',         category: 'Song Lyric'    },
+  { phrase: 'IMAGINE ALL THE PEOPLE LIVING LIFE IN PEACE', category: 'Song Lyric' },
+  { phrase: 'YOU AINT NOTHING BUT A HOUND DOG',     category: 'Song Lyric'    },
+  { phrase: 'ONE FOR THE MONEY TWO FOR THE SHOW',   category: 'Song Lyric'    },
+  { phrase: 'ANOTHER ONE BITES THE DUST AND ANOTHER ONE GONE', category: 'Song Lyric' },
+  { phrase: 'IS THIS THE WAY TO AMARILLO',          category: 'Song Lyric'    },
+  { phrase: 'I WILL SURVIVE AS LONG AS I KNOW HOW TO LOVE', category: 'Song Lyric' },
+  { phrase: 'ITS RAINING MEN HALLELUJAH',           category: 'Song Lyric'    },
+  { phrase: 'ALL ALONG THE WATCHTOWER THERE MUST BE SOME WAY OUT OF HERE', category: 'Song Lyric' },
+  { phrase: 'CAUSE BABY NOW WE GOT BAD BLOOD',      category: 'Song Lyric'    },
+  { phrase: 'ITS BEEN A HARD DAYS NIGHT AND I BEEN WORKING LIKE A DOG', category: 'Song Lyric' },
+  { phrase: 'HELLO FROM THE OTHER SIDE',            category: 'Song Lyric'    },
+  { phrase: 'CAUSE YOU HAD A BAD DAY',              category: 'Song Lyric'    },
+  { phrase: 'I FOUGHT THE LAW AND THE LAW WON',     category: 'Song Lyric'    },
+  { phrase: 'ALL THE SINGLE LADIES NOW PUT YOUR HANDS UP', category: 'Song Lyric' },
+  { phrase: 'YOU SHOOT ME DOWN BUT I WONT FALL',    category: 'Song Lyric'    },
+  { phrase: 'WE DIDNT START THE FIRE',              category: 'Song Lyric'    },
+  { phrase: 'I WALK THE LINE BECAUSE YOU ARE MINE', category: 'Song Lyric'    },
+  { phrase: 'WATCHING THE WHEELS GO ROUND AND ROUND', category: 'Song Lyric'  },
+  { phrase: 'I CAN SEE CLEARLY NOW THE RAIN IS GONE', category: 'Song Lyric'  },
+  { phrase: 'DONT WORRY BE HAPPY',                  category: 'Song Lyric'    },
+  { phrase: 'ALL I WANT FOR CHRISTMAS IS YOU',      category: 'Song Lyric'    },
+  { phrase: 'I WANT IT THAT WAY',                   category: 'Song Lyric'    },
 ];
 
 // Letters ranked by frequency in English (E=most common, Z=rarest).
