@@ -31,17 +31,25 @@ export function makeGuess(letter, state, phrase) {
   const won       = isWin(guessedLetters, phrase);
   const gameOver  = won || wrongCount >= MAX_WRONG;
 
-  return { guessedLetters, wrongCount, won, gameOver };
+  return { ...state, guessedLetters, wrongCount, won, gameOver };
 }
 
 // ---------------------------------------------------------------------------
 // Share text
 // ---------------------------------------------------------------------------
 
-export function buildShareText(phraseObj, wrongCount, won, dateStr) {
+export function formatDuration(ms) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+export function buildShareText(phraseObj, wrongCount, won, dateStr, elapsedMs) {
   const pattern = phraseObj.phrase.split(' ').map(w => '□'.repeat(w.length)).join('  ');
   const result  = won ? `✅ Solved — ${wrongCount} wrong guess${wrongCount !== 1 ? 'es' : ''}` : `❌ Too many wrong guesses`;
-  return `Phrasle ${dateStr} — ${phraseObj.category}\n${pattern}\n${result}\nPlay today's Phrasle! https://jimcottam1.github.io/phrasle/`;
+  const timeLine = elapsedMs != null ? `⏱️ ${formatDuration(elapsedMs)}\n` : '';
+  return `Phrasle ${dateStr} — ${phraseObj.category}\n${pattern}\n${result}\n${timeLine}Play today's Phrasle! https://jimcottam1.github.io/phrasle/`;
 }
 
 // ---------------------------------------------------------------------------

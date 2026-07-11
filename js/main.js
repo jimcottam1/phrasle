@@ -1,6 +1,6 @@
 import { getTodayPhrase } from '../data/phrases.js';
 import {
-  MAX_WRONG, makeGuess, isLetterInPhrase, buildShareText,
+  MAX_WRONG, makeGuess, isLetterInPhrase, buildShareText, formatDuration,
   loadState, saveState, loadStats, saveStats, updateStats,
 } from './game.js';
 
@@ -23,6 +23,8 @@ let state = {
   wrongCount: 0,
   won: false,
   gameOver: false,
+  elapsedMs: 0,
+  activeSince: Date.now(),
 };
 
 let shareText = '';
@@ -37,6 +39,7 @@ const saved = loadState();
 if (saved?.phrase === phrase) {
   state     = saved;
   shareText = saved.shareText ?? '';
+  if (!state.gameOver) state.activeSince = Date.now();
   renderAll();
   if (state.gameOver) {
     document.getElementById('end-panel').hidden = false;
@@ -121,6 +124,33 @@ function renderKeyboard() {
 }
 
 // ---------------------------------------------------------------------------
+// Timer — pauses while the tab is hidden so elapsed time reflects time
+// actually spent looking at the game, not wall-clock time.
+// ---------------------------------------------------------------------------
+
+function syncElapsed() {
+  if (state.activeSince != null) {
+    const now = Date.now();
+    state.elapsedMs += now - state.activeSince;
+    state.activeSince = now;
+  }
+}
+
+function pauseTimer() {
+  syncElapsed();
+  state.activeSince = null;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (state.gameOver) return;
+  if (document.hidden) {
+    pauseTimer();
+  } else {
+    state.activeSince = Date.now();
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Guess handling
 // ---------------------------------------------------------------------------
 
@@ -186,6 +216,8 @@ function updateKeyState(letter) {
 // ---------------------------------------------------------------------------
 
 function endGame() {
+  pauseTimer();
+
   // Reveal all tiles on loss
   if (!state.won) {
     document.querySelectorAll('.phrase-tile').forEach((tile) => {
@@ -195,7 +227,7 @@ function endGame() {
   }
 
   const today = new Date().toLocaleDateString('en-IE', { day: 'numeric', month: 'short' });
-  shareText = buildShareText(phraseObj, state.wrongCount, state.won, today);
+  shareText = buildShareText(phraseObj, state.wrongCount, state.won, today, state.elapsedMs);
 
   const stats = updateStats(loadStats(), state.won, state.wrongCount);
   saveStats(stats);
@@ -211,9 +243,8 @@ function showEndPanel() {
   document.getElementById('end-title').textContent = state.won
     ? `🎉 Well done! ${state.wrongCount} wrong guess${state.wrongCount !== 1 ? 'es' : ''}`
     : `😞 Game over!`;
-  document.getElementById('end-sub').innerHTML = state.won
-    ? `The phrase was <strong>${phrase}</strong>`
-    : `The phrase was <strong>${phrase}</strong>`;
+  document.getElementById('end-sub').innerHTML =
+    `The phrase was <strong>${phrase}</strong> · ⏱️ ${formatDuration(state.elapsedMs)}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -298,5 +329,6 @@ function showToast(message, duration = 2500) {
 // ---------------------------------------------------------------------------
 
 function persist() {
+  syncElapsed();
   saveState(state, { phrase, shareText });
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   MAX_WRONG, getLetterSet, isLetterInPhrase, isWin, makeGuess,
-  buildShareText, loadState, saveState, loadStats, saveStats, updateStats,
+  buildShareText, formatDuration, loadState, saveState, loadStats, saveStats, updateStats,
 } from '../js/game.js';
 
 // ---------------------------------------------------------------------------
@@ -176,6 +176,40 @@ describe('buildShareText', () => {
 
   it('shows failure message on loss', () => {
     expect(buildShareText(phraseObj, 6, false, '21 Jun')).toContain('Too many');
+  });
+
+  it('omits the time line when elapsedMs is not given', () => {
+    expect(buildShareText(phraseObj, 2, true, '21 Jun')).not.toContain('⏱️');
+  });
+
+  it('includes the formatted time when elapsedMs is given', () => {
+    expect(buildShareText(phraseObj, 2, true, '21 Jun', 42000)).toContain('⏱️ 0:42');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// formatDuration
+// ---------------------------------------------------------------------------
+
+describe('formatDuration', () => {
+  it('formats sub-minute durations as 0:SS', () => {
+    expect(formatDuration(42000)).toBe('0:42');
+  });
+
+  it('pads single-digit seconds', () => {
+    expect(formatDuration(65000)).toBe('1:05');
+  });
+
+  it('formats multi-minute durations', () => {
+    expect(formatDuration(125000)).toBe('2:05');
+  });
+
+  it('floors partial seconds', () => {
+    expect(formatDuration(1999)).toBe('0:01');
+  });
+
+  it('clamps negative durations to 0:00', () => {
+    expect(formatDuration(-500)).toBe('0:00');
   });
 });
 
