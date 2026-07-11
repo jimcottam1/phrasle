@@ -28,6 +28,7 @@ let state = {
 };
 
 let shareText = '';
+let timerIntervalId = null;
 
 const KEYBOARD_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
@@ -52,6 +53,9 @@ if (saved?.phrase === phrase) {
     openModal('modal-how');
   }
 }
+
+updateTimerDisplay();
+if (!state.gameOver) startTimerTicking();
 
 // ---------------------------------------------------------------------------
 // Render
@@ -141,12 +145,32 @@ function pauseTimer() {
   state.activeSince = null;
 }
 
+function currentElapsedMs() {
+  return state.elapsedMs + (state.activeSince != null ? Date.now() - state.activeSince : 0);
+}
+
+function updateTimerDisplay() {
+  document.getElementById('hint-timer').textContent = formatDuration(currentElapsedMs());
+}
+
+function startTimerTicking() {
+  if (timerIntervalId != null) return;
+  timerIntervalId = setInterval(updateTimerDisplay, 250);
+}
+
+function stopTimerTicking() {
+  if (timerIntervalId == null) return;
+  clearInterval(timerIntervalId);
+  timerIntervalId = null;
+}
+
 document.addEventListener('visibilitychange', () => {
   if (state.gameOver) return;
   if (document.hidden) {
     pauseTimer();
   } else {
     state.activeSince = Date.now();
+    updateTimerDisplay();
   }
 });
 
@@ -217,6 +241,8 @@ function updateKeyState(letter) {
 
 function endGame() {
   pauseTimer();
+  stopTimerTicking();
+  updateTimerDisplay();
 
   // Reveal all tiles on loss
   if (!state.won) {
