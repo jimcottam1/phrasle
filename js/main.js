@@ -38,7 +38,8 @@ const KEYBOARD_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
 const saved = loadState();
 if (saved?.phrase === phrase) {
-  state     = saved;
+  // Older saves (from before the timer existed) won't have elapsedMs.
+  state     = { elapsedMs: 0, activeSince: null, ...saved };
   shareText = saved.shareText ?? '';
   if (!state.gameOver) state.activeSince = Date.now();
   renderAll();
