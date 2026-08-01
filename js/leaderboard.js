@@ -12,12 +12,14 @@ export function escapeHtml(str) {
   }[c]));
 }
 
-export function buildUserPayload(playerId, name) {
-  return { id: playerId, name: resolveDisplayName(name) };
-}
-
-export function buildScorePayload(playerId, date, wrongCount, elapsedMs) {
-  return { date, player_id: playerId, wrong_count: wrongCount, elapsed_ms: elapsedMs };
+/** Body for the submit-score Edge Function, which validates + writes server-side. */
+export function buildSubmitScorePayload(playerId, name, wrongCount, elapsedMs) {
+  return {
+    playerId,
+    name: resolveDisplayName(name),
+    wrongCount,
+    elapsedMs: Math.round(elapsedMs),
+  };
 }
 
 /** PostgREST path for today's top scores, ranked by fewest wrong guesses then fastest time. */

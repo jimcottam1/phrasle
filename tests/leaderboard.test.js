@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  resolveDisplayName, escapeHtml, buildUserPayload, buildScorePayload,
+  resolveDisplayName, escapeHtml, buildSubmitScorePayload,
   buildLeaderboardPath, renderLeaderboardRows,
 } from '../js/leaderboard.js';
 
@@ -54,31 +54,25 @@ describe('escapeHtml', () => {
 });
 
 // ---------------------------------------------------------------------------
-// buildUserPayload
+// buildSubmitScorePayload
 // ---------------------------------------------------------------------------
 
-describe('buildUserPayload', () => {
-  it('pairs the player id with the resolved name', () => {
-    expect(buildUserPayload('abc-123', 'Jim')).toEqual({ id: 'abc-123', name: 'Jim' });
-  });
-
-  it('falls back to Anonymous when name is blank', () => {
-    expect(buildUserPayload('abc-123', '')).toEqual({ id: 'abc-123', name: 'Anonymous' });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// buildScorePayload
-// ---------------------------------------------------------------------------
-
-describe('buildScorePayload', () => {
-  it('shapes the row for the scores table', () => {
-    expect(buildScorePayload('abc-123', '2026-08-01', 2, 42000)).toEqual({
-      date: '2026-08-01',
-      player_id: 'abc-123',
-      wrong_count: 2,
-      elapsed_ms: 42000,
+describe('buildSubmitScorePayload', () => {
+  it('shapes the body expected by the submit-score Edge Function', () => {
+    expect(buildSubmitScorePayload('abc-123', 'Jim', 2, 42000)).toEqual({
+      playerId: 'abc-123',
+      name: 'Jim',
+      wrongCount: 2,
+      elapsedMs: 42000,
     });
+  });
+
+  it('resolves a blank name to Anonymous', () => {
+    expect(buildSubmitScorePayload('abc-123', '', 0, 1000).name).toBe('Anonymous');
+  });
+
+  it('rounds a fractional elapsed time to the nearest millisecond', () => {
+    expect(buildSubmitScorePayload('abc-123', 'Jim', 0, 1234.7).elapsedMs).toBe(1235);
   });
 });
 

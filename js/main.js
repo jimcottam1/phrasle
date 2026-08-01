@@ -5,7 +5,7 @@ import {
   getPlayerId, getPlayerName, setPlayerName, getLeaderboardOptIn, setLeaderboardOptIn,
 } from './game.js';
 import {
-  buildUserPayload, buildScorePayload, buildLeaderboardPath, renderLeaderboardRows, resolveDisplayName,
+  buildSubmitScorePayload, buildLeaderboardPath, renderLeaderboardRows, resolveDisplayName,
 } from './leaderboard.js';
 
 // ---------------------------------------------------------------------------
@@ -30,20 +30,29 @@ async function supabaseFetch(path, options = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-async function submitScore(wrongCount, elapsedMs) {
+// Writes go through the submit-score Edge Function, not direct REST inserts —
+// it runs a profanity filter on the name and validates the score bounds
+// server-side (using the service-role key), since the anon key alone can no
+// longer write to users/scores (see supabase/lockdown_writes.sql).
+async function submitScore(name, wrongCount, elapsedMs) {
   const playerId = getPlayerId();
-
-  await supabaseFetch('users?on_conflict=id', {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/submit-score`, {
     method: 'POST',
-    headers: { Prefer: 'resolution=merge-duplicates' },
-    body: JSON.stringify(buildUserPayload(playerId, getPlayerName())),
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(buildSubmitScorePayload(playerId, name, wrongCount, elapsedMs)),
   });
 
-  await supabaseFetch('scores?on_conflict=date,player_id', {
-    method: 'POST',
-    headers: { Prefer: 'resolution=merge-duplicates' },
-    body: JSON.stringify(buildScorePayload(playerId, todayKey(), wrongCount, elapsedMs)),
-  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error ?? 'submit_failed');
+    err.code = data.error;
+    throw err;
+  }
+  return data;
 }
 
 async function fetchLeaderboard(date) {
@@ -316,7 +325,15 @@ function endGame() {
 function promptLeaderboard() {
   const optIn = getLeaderboardOptIn();
   if (optIn === true) {
-    submitScore(state.wrongCount, state.elapsedMs).catch(() => {});
+    submitScore(getPlayerName(), state.wrongCount, state.elapsedMs).catch((err) => {
+      // A name that passed before can only fail now if the filter list
+      // changed — bounce back to the opt-in modal so they can fix it,
+      // instead of silently failing every day going forward.
+      if (err.code === 'profane_name') {
+        document.getElementById('optin-name').value = getPlayerName();
+        openModal('modal-optin');
+      }
+    });
   } else if (optIn === null) {
     document.getElementById('optin-name').value = getPlayerName();
     openModal('modal-optin');
@@ -403,19 +420,26 @@ function openStats() {
 
 document.getElementById('close-optin').addEventListener('click', () => closeModal('modal-optin'));
 
-document.getElementById('btn-optin-yes').addEventListener('click', () => {
+document.getElementById('btn-optin-yes').addEventListener('click', async () => {
   const name = resolveDisplayName(document.getElementById('optin-name').value);
+
+  // Only today's finished game has a meaningful score to post — if the
+  // player opts in before playing (or mid-game), the next endGame() call
+  // will submit for them instead, so there's nothing to validate yet.
+  if (state.gameOver) {
+    try {
+      await submitScore(name, state.wrongCount, state.elapsedMs);
+    } catch (err) {
+      showToast(err.code === 'profane_name'
+        ? "That name isn't allowed — please pick another one"
+        : "Couldn't reach the leaderboard — try again later");
+      return;
+    }
+  }
+
   setPlayerName(name);
   setLeaderboardOptIn(true);
   closeModal('modal-optin');
-  // Only today's finished game has a meaningful score to post — if the
-  // player opts in before playing (or mid-game), the next endGame() call
-  // will submit for them instead.
-  if (state.gameOver) {
-    submitScore(state.wrongCount, state.elapsedMs).catch(() => {
-      showToast("Couldn't reach the leaderboard — try again later");
-    });
-  }
 });
 
 document.getElementById('btn-optin-no').addEventListener('click', () => {
