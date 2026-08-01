@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   MAX_WRONG, getLetterSet, isLetterInPhrase, isWin, makeGuess,
   buildShareText, formatDuration, loadState, saveState, loadStats, saveStats, updateStats,
+  todayKey, getPlayerId, getPlayerName, setPlayerName, getLeaderboardOptIn, setLeaderboardOptIn,
 } from '../js/game.js';
 
 // ---------------------------------------------------------------------------
@@ -308,5 +309,88 @@ describe('updateStats', () => {
   it('does not mutate the original stats', () => {
     updateStats(base, true, 1);
     expect(base.played).toBe(5);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// todayKey
+// ---------------------------------------------------------------------------
+
+describe('todayKey', () => {
+  it('formats as YYYY-MM-DD', () => {
+    expect(todayKey()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('matches the local date', () => {
+    const d = new Date();
+    const expected = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    expect(todayKey()).toBe(expected);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Leaderboard identity — player id, name, opt-in
+// ---------------------------------------------------------------------------
+
+describe('getPlayerId', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('generates a uuid on first call', () => {
+    const id = getPlayerId();
+    expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+  });
+
+  it('returns the same id on subsequent calls', () => {
+    const first = getPlayerId();
+    const second = getPlayerId();
+    expect(second).toBe(first);
+  });
+
+  it('persists the id across separate loads (localStorage)', () => {
+    const id = getPlayerId();
+    expect(localStorage.getItem('phrasle_player_id')).toBe(id);
+  });
+});
+
+describe('getPlayerName / setPlayerName', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('returns an empty string when no name has been set', () => {
+    expect(getPlayerName()).toBe('');
+  });
+
+  it('round-trips a saved name', () => {
+    setPlayerName('Jim');
+    expect(getPlayerName()).toBe('Jim');
+  });
+
+  it('overwrites a previously saved name', () => {
+    setPlayerName('Jim');
+    setPlayerName('Cottam');
+    expect(getPlayerName()).toBe('Cottam');
+  });
+});
+
+describe('getLeaderboardOptIn / setLeaderboardOptIn', () => {
+  beforeEach(() => localStorage.clear());
+
+  it('returns null when the player has never been asked', () => {
+    expect(getLeaderboardOptIn()).toBeNull();
+  });
+
+  it('returns true after opting in', () => {
+    setLeaderboardOptIn(true);
+    expect(getLeaderboardOptIn()).toBe(true);
+  });
+
+  it('returns false after opting out', () => {
+    setLeaderboardOptIn(false);
+    expect(getLeaderboardOptIn()).toBe(false);
+  });
+
+  it('can flip from opted-in back to opted-out', () => {
+    setLeaderboardOptIn(true);
+    setLeaderboardOptIn(false);
+    expect(getLeaderboardOptIn()).toBe(false);
   });
 });

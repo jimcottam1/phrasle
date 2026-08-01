@@ -58,8 +58,11 @@ export function buildShareText(phraseObj, wrongCount, won, dateStr, elapsedMs) {
 
 const STATE_KEY = 'phrasle_state';
 const STATS_KEY = 'phrasle_stats';
+const PLAYER_ID_KEY = 'phrasle_player_id';
+const PLAYER_NAME_KEY = 'phrasle_player_name';
+const LEADERBOARD_OPTIN_KEY = 'phrasle_leaderboard_optin';
 
-function todayKey() {
+export function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
@@ -124,4 +127,36 @@ export function updateStats(stats, won, wrongCount) {
     next.streak = 0;
   }
   return next;
+}
+
+// ---------------------------------------------------------------------------
+// Leaderboard identity — a per-browser anonymous id, separate from the
+// player's chosen display name so a rename doesn't orphan past scores.
+// ---------------------------------------------------------------------------
+
+export function getPlayerId() {
+  let id = localStorage.getItem(PLAYER_ID_KEY);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(PLAYER_ID_KEY, id);
+  }
+  return id;
+}
+
+export function getPlayerName() {
+  return localStorage.getItem(PLAYER_NAME_KEY) ?? '';
+}
+
+export function setPlayerName(name) {
+  localStorage.setItem(PLAYER_NAME_KEY, name);
+}
+
+/** true/false once the player has answered, null if never asked. */
+export function getLeaderboardOptIn() {
+  const raw = localStorage.getItem(LEADERBOARD_OPTIN_KEY);
+  return raw === null ? null : raw === 'true';
+}
+
+export function setLeaderboardOptIn(optedIn) {
+  localStorage.setItem(LEADERBOARD_OPTIN_KEY, optedIn ? 'true' : 'false');
 }

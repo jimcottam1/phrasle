@@ -22,6 +22,7 @@
     <div class="header-btns">
       <button class="icon-btn" id="btn-how" aria-label="How to play" title="How to play">?</button>
       <button class="icon-btn" id="btn-stats" aria-label="Statistics" title="Statistics">📊</button>
+      <button class="icon-btn" id="btn-leaderboard" aria-label="Leaderboard" title="Leaderboard">🏆</button>
     </div>
   </header>
 
@@ -48,6 +49,7 @@
     <div class="end-btns">
       <button class="btn btn--primary" id="btn-share">Share 📤</button>
       <button class="btn" id="btn-stats-end">Stats 📊</button>
+      <button class="btn" id="btn-leaderboard-end">Leaderboard 🏆</button>
     </div>
   </div>
 
@@ -72,6 +74,31 @@
       <button class="modal-close" id="close-stats" aria-label="Close">✕</button>
       <h2 class="modal-title" id="modal-stats-title">Statistics</h2>
       <div id="stats-content"></div>
+    </div>
+  </div>
+
+  <!-- Leaderboard opt-in modal -->
+  <div class="modal-backdrop" id="modal-optin" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-optin-title">
+      <button class="modal-close" id="close-optin" aria-label="Close">✕</button>
+      <h2 class="modal-title" id="modal-optin-title">Join the Leaderboard?</h2>
+      <p class="optin-text">Share today's result — wrong guesses and time — under a name of your choosing. You can opt out any time from the leaderboard screen.</p>
+      <input class="optin-input" id="optin-name" type="text" placeholder="Display name" maxlength="24">
+      <div class="end-btns" style="margin-top:16px;">
+        <button class="btn btn--primary" id="btn-optin-yes">Join in</button>
+        <button class="btn" id="btn-optin-no">No thanks</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard modal -->
+  <div class="modal-backdrop" id="modal-leaderboard" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-leaderboard-title">
+      <button class="modal-close" id="close-leaderboard" aria-label="Close">✕</button>
+      <h2 class="modal-title" id="modal-leaderboard-title">Today's Leaderboard</h2>
+      <div id="leaderboard-content"></div>
+      <button class="btn btn--full" id="btn-leaderboard-optout" hidden>Leave the leaderboard</button>
+      <button class="btn btn--primary btn--full" id="btn-leaderboard-optin" hidden>Join the leaderboard</button>
     </div>
   </div>
 

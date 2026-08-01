@@ -1,8 +1,54 @@
 import { getTodayPhrase } from '../data/phrases.js';
 import {
-  MAX_WRONG, makeGuess, isLetterInPhrase, buildShareText, formatDuration,
+  MAX_WRONG, makeGuess, isLetterInPhrase, buildShareText, formatDuration, todayKey,
   loadState, saveState, loadStats, saveStats, updateStats,
+  getPlayerId, getPlayerName, setPlayerName, getLeaderboardOptIn, setLeaderboardOptIn,
 } from './game.js';
+import {
+  buildUserPayload, buildScorePayload, buildLeaderboardPath, renderLeaderboardRows, resolveDisplayName,
+} from './leaderboard.js';
+
+// ---------------------------------------------------------------------------
+// Supabase
+// ---------------------------------------------------------------------------
+
+const SUPABASE_URL = 'https://wvgbriuccwftcddfyhxq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind2Z2JyaXVjY3dmdGNkZGZ5aHhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU5Nzk1OTksImV4cCI6MjA3MTU1NTU5OX0.zgeh3FRGoleSLdeeG7uV8mTC5TM-END0XX2XFNyJRPY';
+
+async function supabaseFetch(path, options = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+  if (!res.ok) throw new Error(`Supabase request failed: ${res.status}`);
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function submitScore(wrongCount, elapsedMs) {
+  const playerId = getPlayerId();
+
+  await supabaseFetch('users?on_conflict=id', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates' },
+    body: JSON.stringify(buildUserPayload(playerId, getPlayerName())),
+  });
+
+  await supabaseFetch('scores?on_conflict=date,player_id', {
+    method: 'POST',
+    headers: { Prefer: 'resolution=merge-duplicates' },
+    body: JSON.stringify(buildScorePayload(playerId, todayKey(), wrongCount, elapsedMs)),
+  });
+}
+
+async function fetchLeaderboard(date) {
+  return supabaseFetch(buildLeaderboardPath(date));
+}
 
 // ---------------------------------------------------------------------------
 // Bootstrap
@@ -263,7 +309,18 @@ function endGame() {
   setTimeout(() => {
     showEndPanel();
     document.getElementById('end-panel').hidden = false;
+    promptLeaderboard();
   }, state.won ? 500 : 800);
+}
+
+function promptLeaderboard() {
+  const optIn = getLeaderboardOptIn();
+  if (optIn === true) {
+    submitScore(state.wrongCount, state.elapsedMs).catch(() => {});
+  } else if (optIn === null) {
+    document.getElementById('optin-name').value = getPlayerName();
+    openModal('modal-optin');
+  }
 }
 
 function showEndPanel() {
@@ -318,7 +375,7 @@ document.getElementById('btn-got-it').addEventListener('click', () => closeModal
 document.getElementById('btn-stats').addEventListener('click', openStats);
 document.getElementById('close-stats').addEventListener('click', () => closeModal('modal-stats'));
 
-['modal-how', 'modal-stats'].forEach((id) => {
+['modal-how', 'modal-stats', 'modal-optin', 'modal-leaderboard'].forEach((id) => {
   document.getElementById(id).addEventListener('click', (e) => {
     if (e.target.id === id) closeModal(id);
   });
@@ -338,6 +395,77 @@ function openStats() {
     <div class="stat-avg">Avg wrong guesses on wins: <strong>${avg}</strong></div>
   `;
   openModal('modal-stats');
+}
+
+// ---------------------------------------------------------------------------
+// Leaderboard opt-in
+// ---------------------------------------------------------------------------
+
+document.getElementById('close-optin').addEventListener('click', () => closeModal('modal-optin'));
+
+document.getElementById('btn-optin-yes').addEventListener('click', () => {
+  const name = resolveDisplayName(document.getElementById('optin-name').value);
+  setPlayerName(name);
+  setLeaderboardOptIn(true);
+  closeModal('modal-optin');
+  // Only today's finished game has a meaningful score to post — if the
+  // player opts in before playing (or mid-game), the next endGame() call
+  // will submit for them instead.
+  if (state.gameOver) {
+    submitScore(state.wrongCount, state.elapsedMs).catch(() => {
+      showToast("Couldn't reach the leaderboard — try again later");
+    });
+  }
+});
+
+document.getElementById('btn-optin-no').addEventListener('click', () => {
+  setLeaderboardOptIn(false);
+  closeModal('modal-optin');
+});
+
+// ---------------------------------------------------------------------------
+// Leaderboard
+// ---------------------------------------------------------------------------
+
+document.getElementById('btn-leaderboard').addEventListener('click', openLeaderboard);
+document.getElementById('btn-leaderboard-end').addEventListener('click', openLeaderboard);
+document.getElementById('close-leaderboard').addEventListener('click', () => closeModal('modal-leaderboard'));
+
+document.getElementById('btn-leaderboard-optout').addEventListener('click', () => {
+  setLeaderboardOptIn(false);
+  closeModal('modal-leaderboard');
+  showToast("You're off the leaderboard — past scores stay, nothing new gets posted");
+});
+
+document.getElementById('btn-leaderboard-optin').addEventListener('click', () => {
+  closeModal('modal-leaderboard');
+  document.getElementById('optin-name').value = getPlayerName();
+  openModal('modal-optin');
+});
+
+async function openLeaderboard() {
+  openModal('modal-leaderboard');
+  const optedIn = getLeaderboardOptIn() === true;
+  document.getElementById('btn-leaderboard-optout').hidden = !optedIn;
+  document.getElementById('btn-leaderboard-optin').hidden = optedIn;
+
+  const content = document.getElementById('leaderboard-content');
+  content.innerHTML = '<div class="leaderboard-empty">Loading…</div>';
+
+  let rows;
+  try {
+    rows = await fetchLeaderboard(todayKey());
+  } catch {
+    content.innerHTML = '<div class="leaderboard-empty">Couldn\'t load the leaderboard right now.</div>';
+    return;
+  }
+
+  if (!rows || rows.length === 0) {
+    content.innerHTML = '<div class="leaderboard-empty">No scores yet today — be the first!</div>';
+    return;
+  }
+
+  content.innerHTML = renderLeaderboardRows(rows);
 }
 
 // ---------------------------------------------------------------------------
