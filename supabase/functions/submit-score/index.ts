@@ -17,14 +17,17 @@ const filter = new Filter();
 // name over — the list is tuned for general content moderation, not names.
 filter.removeWords('crap', 'bloody', 'bum', 'boob', 'butt', 'damn', 'hell', 'god');
 
-// bad-words only matches whole, space-separated words ("fuck you" but not
-// "fuckyou"/"FuckYou") — useless against display names, which are almost
-// always a single token. This is a narrow, deliberately short substring
-// check as a second layer, for names with no spaces to split on.
+// bad-words only matches whole, space-separated words — "fuck you" but not
+// "fuckyou", and not "wanker3" either, since a trailing digit makes it a
+// different token entirely. Names are almost always one undecorated token,
+// so we also check a version with digits/punctuation stripped (catches
+// "wanker3" -> "wanker", "f.u.c.k" -> "fuck") plus a narrow substring list
+// for the worst words even when still glued to other letters ("fuckyou").
 const HARD_BLOCK_RE = /fuck|shit|cunt|nigger|faggot|bitch|asshole|whore|retard/i;
 
 function isRejectedName(name: string): boolean {
-  return filter.isProfane(name) || HARD_BLOCK_RE.test(name);
+  const normalized = name.toLowerCase().replace(/[^a-z]/g, '');
+  return filter.isProfane(name) || filter.isProfane(normalized) || HARD_BLOCK_RE.test(normalized);
 }
 
 // The browser sends a CORS preflight OPTIONS request before the real POST
