@@ -12,13 +12,23 @@ export function escapeHtml(str) {
   }[c]));
 }
 
-/** Body for the submit-score Edge Function, which validates + writes server-side. */
+/**
+ * Body for the submit-score Edge Function, which validates + writes
+ * server-side. timezoneOffsetMinutes (Date.prototype.getTimezoneOffset())
+ * lets the function file the score under the player's *local* calendar day
+ * instead of its own UTC clock's day — otherwise anyone playing within an
+ * hour or so of midnight gets a score dated one day off from what their own
+ * leaderboard view (which is local-date-based) asks for, and it silently
+ * never appears. It's an offset, not an arbitrary date, so the function can
+ * still bound it to real-world values rather than trusting it blindly.
+ */
 export function buildSubmitScorePayload(playerId, name, wrongCount, elapsedMs) {
   return {
     playerId,
     name: resolveDisplayName(name),
     wrongCount,
     elapsedMs: Math.round(elapsedMs),
+    timezoneOffsetMinutes: new Date().getTimezoneOffset(),
   };
 }
 

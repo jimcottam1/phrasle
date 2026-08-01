@@ -104,6 +104,7 @@ describe('leaderboard flow (integration)', () => {
     expect(body.playerId).toMatch(/^[0-9a-f-]{36}$/i);
     expect(body.wrongCount).toBe(0); // only correct letters were guessed
     expect(body.elapsedMs).toBeGreaterThanOrEqual(0);
+    expect(Number.isInteger(body.timezoneOffsetMinutes)).toBe(true); // lets the function file it under the player's local day
 
     // 4. Player id/name persist locally.
     expect(localStorage.getItem('phrasle_player_id')).toBe(body.playerId);

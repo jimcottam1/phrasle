@@ -59,12 +59,14 @@ describe('escapeHtml', () => {
 
 describe('buildSubmitScorePayload', () => {
   it('shapes the body expected by the submit-score Edge Function', () => {
-    expect(buildSubmitScorePayload('abc-123', 'Jim', 2, 42000)).toEqual({
+    const body = buildSubmitScorePayload('abc-123', 'Jim', 2, 42000);
+    expect(body).toMatchObject({
       playerId: 'abc-123',
       name: 'Jim',
       wrongCount: 2,
       elapsedMs: 42000,
     });
+    expect(Number.isInteger(body.timezoneOffsetMinutes)).toBe(true);
   });
 
   it('resolves a blank name to Anonymous', () => {

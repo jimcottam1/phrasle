@@ -48,6 +48,20 @@ function json(body: unknown, status = 200) {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Real-world UTC offsets run from -14:00 to +12:00 (as minutes-to-add-to-
+// local-to-get-UTC, per Date.prototype.getTimezoneOffset()'s sign
+// convention, that's -840..840). Anything outside that range is bogus —
+// fall back to UTC rather than reject the whole submission over it.
+function resolveLocalDate(timezoneOffsetMinutes: unknown): string {
+  const offset = typeof timezoneOffsetMinutes === 'number'
+    && Number.isFinite(timezoneOffsetMinutes)
+    && timezoneOffsetMinutes >= -840
+    && timezoneOffsetMinutes <= 840
+    ? timezoneOffsetMinutes
+    : 0;
+  return new Date(Date.now() - offset * 60_000).toISOString().slice(0, 10);
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
@@ -63,7 +77,7 @@ Deno.serve(async (req) => {
     return json({ error: 'invalid_json' }, 400);
   }
 
-  const { playerId, name, wrongCount, elapsedMs } = body;
+  const { playerId, name, wrongCount, elapsedMs, timezoneOffsetMinutes } = body;
 
   if (typeof playerId !== 'string' || !UUID_RE.test(playerId)) {
     return json({ error: 'invalid_player_id' }, 400);
@@ -84,9 +98,12 @@ Deno.serve(async (req) => {
     return json({ error: 'invalid_elapsed_ms' }, 400);
   }
 
-  // The date is computed here, not trusted from the client, so a player
-  // can't backdate/forward-date a submission by lying about "today."
-  const date = new Date().toISOString().slice(0, 10);
+  // The date is derived here, not trusted verbatim from the client, so a
+  // player can't backdate/forward-date a submission by lying about "today" —
+  // but it does account for their timezone offset (bounded to real-world
+  // values above), so a score filed right around local midnight lands on
+  // the same calendar day the player's own leaderboard view expects.
+  const date = resolveLocalDate(timezoneOffsetMinutes);
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
