@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   resolveDisplayName, escapeHtml, buildSubmitScorePayload,
   buildLeaderboardPath, renderLeaderboardRows,
+  buildWeeklyLeaderboardPath, renderWeeklyLeaderboardRows,
 } from '../js/leaderboard.js';
 
 // ---------------------------------------------------------------------------
@@ -141,5 +142,63 @@ describe('renderLeaderboardRows', () => {
 
   it('returns an empty string for an empty list', () => {
     expect(renderLeaderboardRows([])).toBe('');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// buildWeeklyLeaderboardPath
+// ---------------------------------------------------------------------------
+
+describe('buildWeeklyLeaderboardPath', () => {
+  it('calls the weekly_leaderboard RPC with the given weeks_ago', () => {
+    expect(buildWeeklyLeaderboardPath(0)).toBe('rpc/weekly_leaderboard?weeks_ago=0&limit=10');
+    expect(buildWeeklyLeaderboardPath(1)).toBe('rpc/weekly_leaderboard?weeks_ago=1&limit=10');
+  });
+
+  it('accepts a custom limit', () => {
+    expect(buildWeeklyLeaderboardPath(1, 3)).toBe('rpc/weekly_leaderboard?weeks_ago=1&limit=3');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// renderWeeklyLeaderboardRows
+// ---------------------------------------------------------------------------
+
+describe('renderWeeklyLeaderboardRows', () => {
+  it('renders rank, name, games played, avg wrong, and avg time', () => {
+    const html = renderWeeklyLeaderboardRows([
+      { name: 'Alice', games_played: 5, avg_wrong: 1.4, avg_elapsed_ms: 65000 },
+    ]);
+    expect(html).toContain('>1<');
+    expect(html).toContain('Alice');
+    expect(html).toContain('5 played');
+    expect(html).toContain('1.4 avg wrong');
+    expect(html).toContain('1:05');
+  });
+
+  it('rounds avg_wrong to one decimal place', () => {
+    const html = renderWeeklyLeaderboardRows([
+      { name: 'Bob', games_played: 3, avg_wrong: 2, avg_elapsed_ms: 1000 },
+    ]);
+    expect(html).toContain('2.0 avg wrong');
+  });
+
+  it('escapes a malicious name', () => {
+    const html = renderWeeklyLeaderboardRows([
+      { name: '<script>alert(1)</script>', games_played: 1, avg_wrong: 0, avg_elapsed_ms: 1000 },
+    ]);
+    expect(html).not.toContain('<script>');
+    expect(html).toContain('&lt;script&gt;');
+  });
+
+  it('falls back to Anonymous when name is missing', () => {
+    const html = renderWeeklyLeaderboardRows([
+      { name: null, games_played: 1, avg_wrong: 0, avg_elapsed_ms: 1000 },
+    ]);
+    expect(html).toContain('Anonymous');
+  });
+
+  it('returns an empty string for an empty list', () => {
+    expect(renderWeeklyLeaderboardRows([])).toBe('');
   });
 });

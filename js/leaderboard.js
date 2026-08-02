@@ -47,3 +47,26 @@ export function renderLeaderboardRows(rows) {
     </div>
   `).join('');
 }
+
+// ---------------------------------------------------------------------------
+// Weekly leaderboard — a Postgres function (not a plain table/view) since it
+// takes a "weeks ago" parameter: 0 = the current, still-in-progress week
+// (Mon 00:00 so far), 1 = the most recently completed Mon-Sun week, whose
+// result is final and never changes again once that week is over.
+// ---------------------------------------------------------------------------
+
+export function buildWeeklyLeaderboardPath(weeksAgo, limit = 10) {
+  return `rpc/weekly_leaderboard?weeks_ago=${weeksAgo}&limit=${limit}`;
+}
+
+export function renderWeeklyLeaderboardRows(rows) {
+  return rows.map((row, i) => `
+    <div class="leaderboard-row">
+      <span class="leaderboard-rank">${i + 1}</span>
+      <span class="leaderboard-name">${escapeHtml(row.name ?? 'Anonymous')}</span>
+      <span class="leaderboard-games">${row.games_played} played</span>
+      <span class="leaderboard-wrong">${Number(row.avg_wrong).toFixed(1)} avg wrong</span>
+      <span class="leaderboard-time">${formatDuration(row.avg_elapsed_ms)} avg</span>
+    </div>
+  `).join('');
+}

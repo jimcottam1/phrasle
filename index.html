@@ -99,6 +99,18 @@
       <div id="leaderboard-content"></div>
       <button class="btn btn--full" id="btn-leaderboard-optout" hidden>Leave the leaderboard</button>
       <button class="btn btn--primary btn--full" id="btn-leaderboard-optin" hidden>Join the leaderboard</button>
+      <button class="btn btn--full" id="btn-open-weekly" style="margin-top:8px;">This Week 📅</button>
+    </div>
+  </div>
+
+  <!-- Weekly leaderboard modal -->
+  <div class="modal-backdrop" id="modal-weekly" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-weekly-title">
+      <button class="modal-close" id="close-weekly" aria-label="Close">✕</button>
+      <h2 class="modal-title" id="modal-weekly-title">This Week</h2>
+      <div id="weekly-winner-banner" class="weekly-winner-banner"></div>
+      <p class="weekly-subheading">Ranked by average wrong guesses per day played — updates live, locks in for good once the week ends.</p>
+      <div id="weekly-content"></div>
     </div>
   </div>
 

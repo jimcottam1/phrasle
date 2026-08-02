@@ -6,6 +6,7 @@ import {
 } from './game.js';
 import {
   buildSubmitScorePayload, buildLeaderboardPath, renderLeaderboardRows, resolveDisplayName,
+  buildWeeklyLeaderboardPath, renderWeeklyLeaderboardRows, escapeHtml,
 } from './leaderboard.js';
 
 // ---------------------------------------------------------------------------
@@ -57,6 +58,10 @@ async function submitScore(name, wrongCount, elapsedMs) {
 
 async function fetchLeaderboard(date) {
   return supabaseFetch(buildLeaderboardPath(date));
+}
+
+async function fetchWeeklyLeaderboard(weeksAgo) {
+  return supabaseFetch(buildWeeklyLeaderboardPath(weeksAgo));
 }
 
 // ---------------------------------------------------------------------------
@@ -392,7 +397,7 @@ document.getElementById('btn-got-it').addEventListener('click', () => closeModal
 document.getElementById('btn-stats').addEventListener('click', openStats);
 document.getElementById('close-stats').addEventListener('click', () => closeModal('modal-stats'));
 
-['modal-how', 'modal-stats', 'modal-optin', 'modal-leaderboard'].forEach((id) => {
+['modal-how', 'modal-stats', 'modal-optin', 'modal-leaderboard', 'modal-weekly'].forEach((id) => {
   document.getElementById(id).addEventListener('click', (e) => {
     if (e.target.id === id) closeModal(id);
   });
@@ -490,6 +495,55 @@ async function openLeaderboard() {
   }
 
   content.innerHTML = renderLeaderboardRows(rows);
+}
+
+// ---------------------------------------------------------------------------
+// Weekly leaderboard — weeks_ago=1 is the most recently completed Mon-Sun
+// week (final, locked, shown as a banner); weeks_ago=0 is the current
+// in-progress week (live, changes as more scores come in, until it becomes
+// next week's "weeks_ago=1").
+// ---------------------------------------------------------------------------
+
+document.getElementById('btn-open-weekly').addEventListener('click', () => {
+  closeModal('modal-leaderboard');
+  openWeekly();
+});
+document.getElementById('close-weekly').addEventListener('click', () => closeModal('modal-weekly'));
+
+async function openWeekly() {
+  openModal('modal-weekly');
+
+  const banner = document.getElementById('weekly-winner-banner');
+  const content = document.getElementById('weekly-content');
+  banner.textContent = 'Loading…';
+  content.innerHTML = '<div class="leaderboard-empty">Loading…</div>';
+
+  let lastWeekRows, thisWeekRows;
+  try {
+    [lastWeekRows, thisWeekRows] = await Promise.all([
+      fetchWeeklyLeaderboard(1),
+      fetchWeeklyLeaderboard(0),
+    ]);
+  } catch {
+    banner.textContent = '';
+    content.innerHTML = '<div class="leaderboard-empty">Couldn\'t load the weekly leaderboard right now.</div>';
+    return;
+  }
+
+  if (lastWeekRows && lastWeekRows.length > 0) {
+    const winner = lastWeekRows[0];
+    banner.innerHTML = `🏆 Last week's winner: <strong>${escapeHtml(winner.name ?? 'Anonymous')}</strong>` +
+      ` — ${Number(winner.avg_wrong).toFixed(1)} avg wrong, ${formatDuration(winner.avg_elapsed_ms)} avg`;
+  } else {
+    banner.textContent = 'No games recorded last week.';
+  }
+
+  if (!thisWeekRows || thisWeekRows.length === 0) {
+    content.innerHTML = '<div class="leaderboard-empty">No scores yet this week — be the first!</div>';
+    return;
+  }
+
+  content.innerHTML = renderWeeklyLeaderboardRows(thisWeekRows);
 }
 
 // ---------------------------------------------------------------------------
