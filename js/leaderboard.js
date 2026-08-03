@@ -83,14 +83,33 @@ export function buildWeeklyLeaderboardPath(weeksAgo, limit = 10) {
   return `rpc/weekly_leaderboard?weeks_ago=${weeksAgo}&limit=${limit}`;
 }
 
+const GAMES_LABEL = 'Played';
+const AVG_WRONG_LABEL = 'Avg Wrong';
+const AVG_TIME_LABEL = 'Avg Time';
+
 export function renderWeeklyLeaderboardRows(rows) {
-  return rows.map((row, i) => `
+  if (rows.length === 0) return '';
+  const nameWidth = Math.min(20, Math.max(1, ...rows.map((row) => (row.name ?? 'Anonymous').length)));
+  const gamesWidth = Math.max(GAMES_LABEL.length, ...rows.map((row) => String(row.games_played).length)) + 1;
+  const wrongWidth = Math.max(AVG_WRONG_LABEL.length, ...rows.map((row) => Number(row.avg_wrong).toFixed(1).length)) + 1;
+  const timeWidth = Math.max(AVG_TIME_LABEL.length, ...rows.map((row) => formatDuration(row.avg_elapsed_ms).length)) + 1;
+  const header = `
+    <div class="leaderboard-row leaderboard-row--header">
+      <span class="leaderboard-rank"></span>
+      <span class="leaderboard-name" style="width: ${nameWidth}ch"></span>
+      <span class="leaderboard-games" style="width: ${gamesWidth}ch">${GAMES_LABEL}</span>
+      <span class="leaderboard-wrong" style="width: ${wrongWidth}ch">${AVG_WRONG_LABEL}</span>
+      <span class="leaderboard-time" style="width: ${timeWidth}ch">${AVG_TIME_LABEL}</span>
+    </div>
+  `;
+  const body = rows.map((row, i) => `
     <div class="leaderboard-row">
       <span class="leaderboard-rank">${i + 1}</span>
-      <span class="leaderboard-name">${escapeHtml(row.name ?? 'Anonymous')}</span>
-      <span class="leaderboard-games">${row.games_played} played</span>
-      <span class="leaderboard-wrong">${Number(row.avg_wrong).toFixed(1)} avg wrong</span>
-      <span class="leaderboard-time">${formatDuration(row.avg_elapsed_ms)} avg</span>
+      <span class="leaderboard-name" style="width: ${nameWidth}ch">${escapeHtml(row.name ?? 'Anonymous')}</span>
+      <span class="leaderboard-games" style="width: ${gamesWidth}ch">${row.games_played}</span>
+      <span class="leaderboard-wrong" style="width: ${wrongWidth}ch">${Number(row.avg_wrong).toFixed(1)}</span>
+      <span class="leaderboard-time" style="width: ${timeWidth}ch">${formatDuration(row.avg_elapsed_ms)}</span>
     </div>
   `).join('');
+  return header + body;
 }

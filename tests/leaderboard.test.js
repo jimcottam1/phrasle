@@ -167,14 +167,17 @@ describe('buildWeeklyLeaderboardPath', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderWeeklyLeaderboardRows', () => {
-  it('renders rank, name, games played, avg wrong, and avg time', () => {
+  it('renders rank, name, games played, avg wrong, and avg time, labeled via column headers', () => {
     const html = renderWeeklyLeaderboardRows([
       { name: 'Alice', games_played: 5, avg_wrong: 1.4, avg_elapsed_ms: 65000 },
     ]);
     expect(html).toContain('>1<');
     expect(html).toContain('Alice');
-    expect(html).toContain('5 played');
-    expect(html).toContain('1.4 avg wrong');
+    expect(html).toContain('Played');
+    expect(html).toContain('Avg Wrong');
+    expect(html).toContain('Avg Time');
+    expect(html).toContain('>5<');
+    expect(html).toContain('>1.4<');
     expect(html).toContain('1:05');
   });
 
@@ -182,7 +185,7 @@ describe('renderWeeklyLeaderboardRows', () => {
     const html = renderWeeklyLeaderboardRows([
       { name: 'Bob', games_played: 3, avg_wrong: 2, avg_elapsed_ms: 1000 },
     ]);
-    expect(html).toContain('2.0 avg wrong');
+    expect(html).toContain('>2.0<');
   });
 
   it('escapes a malicious name', () => {
