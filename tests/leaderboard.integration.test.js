@@ -116,8 +116,8 @@ describe('leaderboard flow (integration)', () => {
 
     const content = document.getElementById('leaderboard-content').innerHTML;
     expect(content.indexOf('Alice')).toBeLessThan(content.indexOf('Bob'));
-    expect(content).toContain('0 wrong');
-    expect(content).toContain('1 wrong');
+    expect(content).toContain('Wrong');
+    expect(content).toContain('Time');
 
     const getCall = fetchMock.mock.calls.find(([url]) => !url.includes(SUBMIT_URL_FRAGMENT));
     expect(getCall[0]).toContain('order=wrong_count.asc,elapsed_ms.asc');

@@ -121,9 +121,11 @@ describe('renderLeaderboardRows', () => {
     expect(html).toContain('>2<'); // Bob's rank
   });
 
-  it('shows wrong-guess count and formatted time', () => {
+  it('shows wrong-guess count and formatted time, labeled via column headers', () => {
     const html = renderLeaderboardRows([{ wrong_count: 3, elapsed_ms: 65000, users: { name: 'Alice' } }]);
-    expect(html).toContain('3 wrong');
+    expect(html).toContain('Wrong');
+    expect(html).toContain('Time');
+    expect(html).toContain('>3<');
     expect(html).toContain('1:05');
   });
 
