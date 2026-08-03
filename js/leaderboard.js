@@ -56,7 +56,7 @@ export function renderLeaderboardRows(rows) {
   const header = `
     <div class="leaderboard-row leaderboard-row--header">
       <span class="leaderboard-rank"></span>
-      <span class="leaderboard-name" style="width: ${nameWidth}ch"></span>
+      <span class="leaderboard-name" style="max-width: ${nameWidth}ch"></span>
       <span class="leaderboard-wrong" style="width: ${wrongWidth}ch">${WRONG_LABEL}</span>
       <span class="leaderboard-time" style="width: ${timeWidth}ch">${TIME_LABEL}</span>
     </div>
@@ -64,7 +64,7 @@ export function renderLeaderboardRows(rows) {
   const body = rows.map((row, i) => `
     <div class="leaderboard-row">
       <span class="leaderboard-rank">${i + 1}</span>
-      <span class="leaderboard-name" style="width: ${nameWidth}ch">${escapeHtml(row.users?.name ?? 'Anonymous')}</span>
+      <span class="leaderboard-name" style="max-width: ${nameWidth}ch">${escapeHtml(row.users?.name ?? 'Anonymous')}</span>
       <span class="leaderboard-wrong" style="width: ${wrongWidth}ch">${row.wrong_count}</span>
       <span class="leaderboard-time" style="width: ${timeWidth}ch">${formatDuration(row.elapsed_ms)}</span>
     </div>
@@ -96,7 +96,7 @@ export function renderWeeklyLeaderboardRows(rows) {
   const header = `
     <div class="leaderboard-row leaderboard-row--header">
       <span class="leaderboard-rank"></span>
-      <span class="leaderboard-name" style="width: ${nameWidth}ch"></span>
+      <span class="leaderboard-name" style="max-width: ${nameWidth}ch"></span>
       <span class="leaderboard-games" style="width: ${gamesWidth}ch">${GAMES_LABEL}</span>
       <span class="leaderboard-wrong" style="width: ${wrongWidth}ch">${AVG_WRONG_LABEL}</span>
       <span class="leaderboard-time" style="width: ${timeWidth}ch">${AVG_TIME_LABEL}</span>
@@ -105,7 +105,7 @@ export function renderWeeklyLeaderboardRows(rows) {
   const body = rows.map((row, i) => `
     <div class="leaderboard-row">
       <span class="leaderboard-rank">${i + 1}</span>
-      <span class="leaderboard-name" style="width: ${nameWidth}ch">${escapeHtml(row.name ?? 'Anonymous')}</span>
+      <span class="leaderboard-name" style="max-width: ${nameWidth}ch">${escapeHtml(row.name ?? 'Anonymous')}</span>
       <span class="leaderboard-games" style="width: ${gamesWidth}ch">${row.games_played}</span>
       <span class="leaderboard-wrong" style="width: ${wrongWidth}ch">${Number(row.avg_wrong).toFixed(1)}</span>
       <span class="leaderboard-time" style="width: ${timeWidth}ch">${formatDuration(row.avg_elapsed_ms)}</span>

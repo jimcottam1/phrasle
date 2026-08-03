@@ -321,6 +321,14 @@ body {
   position: relative;
 }
 
+/* On a narrow phone the weekly leaderboard's 5 columns leave very little
+   room for the name — claw back space from padding/gaps here rather than
+   letting the name column alone absorb the whole shortfall. */
+@media (max-width: 480px) {
+  .modal { padding: 16px; }
+  .leaderboard-row { gap: 6px; }
+}
+
 .leaderboard-scroll {
   max-height: 50vh;
   overflow-y: auto;
@@ -420,7 +428,14 @@ body {
    so a "ch" width means the same number of pixels in the header row as in a
    data row — otherwise the header's smaller/uppercase text throws every
    column after it out of alignment with the data beneath it. */
-.leaderboard-name { flex: 0 0 auto; font-weight: 600; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The name column is the only one allowed to shrink below its ideal
+   (max-)width — flex-shrink lets it give up space on a narrow screen
+   instead of pushing the fixed-width stat columns off the edge of the
+   modal, where they'd silently require a sideways scroll to reach. A
+   6ch min-width stops it giving up so much that every name gets reduced
+   to two or three letters — past that floor the row scrolls horizontally
+   instead, which only bites on the widest name on the smallest screens. */
+.leaderboard-name { flex: 1 1 0; min-width: 6ch; font-weight: 600; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .leaderboard-wrong { flex: 0 0 auto; text-align: right; color: var(--text-muted); font-size: 0.8rem; }
 .leaderboard-time { flex: 0 0 auto; text-align: right; font-variant-numeric: tabular-nums; color: var(--text-muted); font-size: 0.9rem; }
 .leaderboard-empty { text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 12px 0; }
