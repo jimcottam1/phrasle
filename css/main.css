@@ -321,6 +321,11 @@ body {
   position: relative;
 }
 
+.leaderboard-scroll {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
 .modal-title {
   font-size: 1.1rem;
   font-weight: 800;

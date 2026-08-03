@@ -56,8 +56,10 @@ async function submitScore(name, wrongCount, elapsedMs) {
   return data;
 }
 
+// Every player who posted a score today, not just the top 10 — this is a
+// small family/friends leaderboard, so "everyone" is never a huge list.
 async function fetchLeaderboard(date) {
-  return supabaseFetch(buildLeaderboardPath(date));
+  return supabaseFetch(buildLeaderboardPath(date, 1000));
 }
 
 async function fetchWeeklyLeaderboard(weeksAgo) {
