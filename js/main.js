@@ -92,6 +92,11 @@ let state = {
 let shareText = '';
 let timerIntervalId = null;
 
+// Tile -> true letter, kept in memory rather than as a DOM attribute so an
+// unrevealed tile doesn't expose the answer to anyone reading the page
+// (view-source, devtools, a userscript) before it's actually been guessed.
+let tileLetters = new Map();
+
 const KEYBOARD_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
 
 // ---------------------------------------------------------------------------
@@ -133,6 +138,7 @@ function renderAll() {
 function renderPhrase() {
   const container = document.getElementById('phrase-display');
   container.innerHTML = '';
+  tileLetters = new Map();
 
   phrase.split(' ').forEach((word) => {
     const wordEl = document.createElement('div');
@@ -143,7 +149,8 @@ function renderPhrase() {
       const isRevealed = state.guessedLetters.has(char.toUpperCase()) || state.gameOver;
       tile.className = 'phrase-tile' + (isRevealed ? ' phrase-tile--revealed' : '');
       tile.textContent = isRevealed ? char : '';
-      tile.setAttribute('data-letter', char);
+      if (isRevealed) tile.setAttribute('data-letter', char);
+      tileLetters.set(tile, char);
       wordEl.appendChild(tile);
     });
 
@@ -274,8 +281,10 @@ function handleGuess(letter) {
 }
 
 function revealTiles(letter) {
-  document.querySelectorAll(`.phrase-tile[data-letter="${letter}"]`).forEach((tile) => {
+  tileLetters.forEach((char, tile) => {
+    if (char.toUpperCase() !== letter) return;
     tile.textContent = letter;
+    tile.setAttribute('data-letter', char);
     tile.classList.add('phrase-tile--pop');
     setTimeout(() => {
       tile.classList.add('phrase-tile--revealed');
@@ -309,8 +318,9 @@ function endGame() {
 
   // Reveal all tiles on loss
   if (!state.won) {
-    document.querySelectorAll('.phrase-tile').forEach((tile) => {
-      tile.textContent = tile.getAttribute('data-letter');
+    tileLetters.forEach((char, tile) => {
+      tile.textContent = char;
+      tile.setAttribute('data-letter', char);
       tile.classList.add('phrase-tile--revealed', 'phrase-tile--loss');
     });
   }
