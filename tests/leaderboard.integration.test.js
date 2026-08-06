@@ -198,3 +198,53 @@ describe('leaderboard flow (integration)', () => {
     expect(localStorage.getItem('phrasle_player_name')).toBe('Jim');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Weekly prize requires 5+ games so a single lucky game can't win it — see
+// MIN_GAMES_FOR_PRIZE in main.js.
+// ---------------------------------------------------------------------------
+
+describe('weekly leaderboard prize threshold (integration)', () => {
+  let lastWeekMock;
+
+  beforeEach(() => {
+    localStorage.clear();
+    loadIndexBody();
+    lastWeekMock = [];
+
+    vi.stubGlobal('fetch', vi.fn(async (url) => {
+      if (url.includes('weeks_ago=1')) return { ok: true, text: async () => JSON.stringify(lastWeekMock) };
+      return { ok: true, text: async () => JSON.stringify([]) }; // this week, unused here
+    }));
+  });
+
+  it("skips a one-game lucky score and names the best-ranked player who reached the games threshold as last week's winner", async () => {
+    // Already sorted best-avg-first, as the SQL function returns it.
+    lastWeekMock = [
+      { name: 'Lucky', games_played: 1, avg_wrong: 0, avg_elapsed_ms: 3000 },
+      { name: 'Regular', games_played: 5, avg_wrong: 1.2, avg_elapsed_ms: 20000 },
+    ];
+    await importMain();
+    click('btn-open-weekly');
+    await wait(10);
+
+    const banner = document.getElementById('weekly-winner-banner').textContent;
+    expect(banner).toContain('Regular');
+    expect(banner).not.toContain('Lucky');
+  });
+
+  it('awards no prize when nobody reached the games threshold, instead of picking the best of the ineligible', async () => {
+    lastWeekMock = [
+      { name: 'Lucky', games_played: 1, avg_wrong: 0, avg_elapsed_ms: 3000 },
+      { name: 'AlsoFewGames', games_played: 2, avg_wrong: 1.0, avg_elapsed_ms: 5000 },
+    ];
+    await importMain();
+    click('btn-open-weekly');
+    await wait(10);
+
+    const banner = document.getElementById('weekly-winner-banner').textContent;
+    expect(banner).not.toContain('Lucky');
+    expect(banner).not.toContain('AlsoFewGames');
+    expect(banner).toMatch(/no prize/i);
+  });
+});

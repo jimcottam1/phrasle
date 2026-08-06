@@ -512,6 +512,11 @@ document.getElementById('btn-open-weekly').addEventListener('click', () => {
 });
 document.getElementById('close-weekly').addEventListener('click', () => closeModal('modal-weekly'));
 
+// A single lucky game shouldn't beat someone who played all week — the
+// prize only goes to whoever ranks best among players with enough games
+// to make the average mean something.
+const MIN_GAMES_FOR_PRIZE = 5;
+
 async function openWeekly() {
   openModal('modal-weekly');
 
@@ -532,10 +537,12 @@ async function openWeekly() {
     return;
   }
 
-  if (lastWeekRows && lastWeekRows.length > 0) {
-    const winner = lastWeekRows[0];
+  const winner = lastWeekRows?.find((row) => row.games_played >= MIN_GAMES_FOR_PRIZE);
+  if (winner) {
     banner.innerHTML = `🏆 Last week's winner: <strong>${escapeHtml(winner.name ?? 'Anonymous')}</strong>` +
       ` — ${Number(winner.avg_wrong).toFixed(1)} avg wrong, ${formatDuration(winner.avg_elapsed_ms)} avg`;
+  } else if (lastWeekRows && lastWeekRows.length > 0) {
+    banner.textContent = `No one played ${MIN_GAMES_FOR_PRIZE}+ games last week, so no prize was awarded.`;
   } else {
     banner.textContent = 'No games recorded last week.';
   }
