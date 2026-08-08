@@ -62,8 +62,10 @@ async function fetchLeaderboard(date) {
   return supabaseFetch(buildLeaderboardPath(date, 1000));
 }
 
+// Same reasoning as fetchLeaderboard above — show every player who posted
+// a score that week, not just the top 10.
 async function fetchWeeklyLeaderboard(weeksAgo) {
-  return supabaseFetch(buildWeeklyLeaderboardPath(weeksAgo));
+  return supabaseFetch(buildWeeklyLeaderboardPath(weeksAgo, 1000));
 }
 
 // ---------------------------------------------------------------------------
