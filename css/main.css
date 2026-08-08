@@ -452,6 +452,48 @@ body {
   font-size: 0.9rem;
 }
 .weekly-winner-banner strong { color: var(--green-light); }
+
+.weekly-winner-banner--winner {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface-2), var(--surface-2)) padding-box,
+    linear-gradient(120deg, #ffd23f, #ee6c9d, #6c8cff, #ffd23f) border-box;
+  background-size: 100% 100%, 300% 300%;
+  animation: weekly-winner-shimmer 6s ease infinite, weekly-winner-glow 2.4s ease-in-out infinite;
+}
+.weekly-winner-banner--winner strong {
+  background: linear-gradient(120deg, #ffd23f, #ee6c9d, #6c8cff);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: weekly-winner-shimmer 6s ease infinite;
+}
+.weekly-winner-trophy {
+  display: inline-block;
+  animation: weekly-winner-bounce 1.6s ease-in-out infinite;
+}
+@keyframes weekly-winner-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes weekly-winner-glow {
+  0%, 100% { box-shadow: 0 0 6px 0 rgba(238, 108, 157, 0.25); }
+  50% { box-shadow: 0 0 16px 2px rgba(108, 140, 255, 0.35); }
+}
+@keyframes weekly-winner-bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-3px) rotate(-8deg); }
+  50% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(-2px) rotate(8deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .weekly-winner-banner--winner,
+  .weekly-winner-banner--winner strong,
+  .weekly-winner-trophy {
+    animation: none;
+  }
+}
 .weekly-subheading {
   color: var(--text-muted);
   font-size: 0.78rem;

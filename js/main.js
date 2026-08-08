@@ -540,8 +540,9 @@ async function openWeekly() {
   }
 
   const winner = lastWeekRows?.find((row) => row.games_played >= MIN_GAMES_FOR_PRIZE);
+  banner.classList.toggle('weekly-winner-banner--winner', !!winner);
   if (winner) {
-    banner.innerHTML = `🏆 Last week's winner: <strong>${escapeHtml(winner.name ?? 'Anonymous')}</strong>` +
+    banner.innerHTML = `<span class="weekly-winner-trophy">🏆</span> Last week's winner: <strong>${escapeHtml(winner.name ?? 'Anonymous')}</strong>` +
       ` — ${Number(winner.avg_wrong).toFixed(1)} avg wrong, ${formatDuration(winner.avg_elapsed_ms)} avg`;
   } else if (lastWeekRows && lastWeekRows.length > 0) {
     banner.textContent = `No one played ${MIN_GAMES_FOR_PRIZE}+ games last week, so no prize was awarded.`;
