@@ -34,11 +34,18 @@ function click(id) {
   document.getElementById(id).click();
 }
 
-/** Guesses every unique letter in today's phrase so the game ends in a clean win. */
-async function playToWin(phrase) {
+/**
+ * Guesses every unique letter in today's phrase so the game ends in a clean
+ * win. delayMs between clicks defaults to 0 — an instant, scripted-looking
+ * solve, which is exactly the shape js/main.js's isSessionPlausible() is
+ * meant to catch. Tests standing in for genuinely honest play pass a real
+ * delay to stay clear of that check's threshold (MIN_SOLVE_MS_PER_LETTER).
+ */
+async function playToWin(phrase, delayMs = 0) {
   for (const letter of getLetterSet(phrase)) {
     const key = document.querySelector(`.key[data-letter="${letter}"]`);
     key.click();
+    if (delayMs) await wait(delayMs);
   }
   await wait(700); // covers endGame's setTimeout(showEndPanel/promptLeaderboard, 500)
 }
@@ -77,7 +84,7 @@ describe('leaderboard flow (integration)', () => {
     const { phrase } = getTodayPhrase();
     await importMain();
 
-    await playToWin(phrase);
+    await playToWin(phrase, 300);
 
     // 1. Never asked before -> opt-in modal appears.
     expect(document.getElementById('modal-optin').hidden).toBe(false);
@@ -105,6 +112,7 @@ describe('leaderboard flow (integration)', () => {
     expect(body.wrongCount).toBe(0); // only correct letters were guessed
     expect(body.elapsedMs).toBeGreaterThanOrEqual(0);
     expect(Number.isInteger(body.timezoneOffsetMinutes)).toBe(true); // lets the function file it under the player's local day
+    expect(body.sessionPlausible).toBe(true); // honest, human-paced win
 
     // 4. Player id/name persist locally.
     expect(localStorage.getItem('phrasle_player_id')).toBe(body.playerId);
@@ -153,7 +161,7 @@ describe('leaderboard flow (integration)', () => {
     const { phrase } = getTodayPhrase();
     await importMain();
 
-    await playToWin(phrase);
+    await playToWin(phrase, 300);
     expect(document.getElementById('modal-optin').hidden).toBe(false);
 
     click('btn-optin-no');
@@ -171,7 +179,7 @@ describe('leaderboard flow (integration)', () => {
     const { phrase } = getTodayPhrase();
     await importMain();
 
-    await playToWin(phrase);
+    await playToWin(phrase, 300);
 
     submitScoreResult = { ok: false, status: 422, error: 'profane_name' };
     document.getElementById('optin-name').value = 'RudeWord';
@@ -196,6 +204,41 @@ describe('leaderboard flow (integration)', () => {
     expect(document.getElementById('modal-optin').hidden).toBe(true);
     expect(localStorage.getItem('phrasle_leaderboard_optin')).toBe('true');
     expect(localStorage.getItem('phrasle_player_name')).toBe('Jim');
+  });
+
+  it('flags a submission as a suspected cheat when getTodayPhrase() is called outside the game', async () => {
+    const { phrase } = getTodayPhrase();
+    await importMain();
+
+    // Same shape as a userscript/console cheat: independently import the
+    // live data module main.js already loaded and ask it for the answer,
+    // bypassing the game entirely.
+    const liveModule = await import('../data/phrases.js');
+    liveModule.getTodayPhrase();
+
+    await playToWin(phrase, 300); // otherwise-honest pacing — isolates this signal from the timing one
+
+    document.getElementById('optin-name').value = 'Jim';
+    click('btn-optin-yes');
+    await wait(10);
+
+    const body = JSON.parse(postCalls[0].options.body);
+    expect(body.sessionPlausible).toBe(false);
+  });
+
+  it('flags a submission as a suspected cheat when a 0-wrong win finishes faster than a human can click', async () => {
+    const { phrase } = getTodayPhrase();
+    await importMain();
+
+    await playToWin(phrase); // default delayMs=0 — instant, scripted-looking solve
+
+    document.getElementById('optin-name').value = 'Jim';
+    click('btn-optin-yes');
+    await wait(10);
+
+    const body = JSON.parse(postCalls[0].options.body);
+    expect(body.wrongCount).toBe(0);
+    expect(body.sessionPlausible).toBe(false);
   });
 });
 

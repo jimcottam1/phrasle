@@ -1,6 +1,6 @@
-import { getTodayPhrase } from '../data/phrases.js';
+import { getTodayPhrase, getPhraseRequestCount } from '../data/phrases.js';
 import {
-  MAX_WRONG, makeGuess, isLetterInPhrase, buildShareText, formatDuration, todayKey,
+  MAX_WRONG, makeGuess, isLetterInPhrase, getLetterSet, buildShareText, formatDuration, todayKey,
   loadState, saveState, loadStats, saveStats, updateStats,
   getPlayerId, getPlayerName, setPlayerName, getLeaderboardOptIn, setLeaderboardOptIn,
 } from './game.js';
@@ -37,6 +37,7 @@ async function supabaseFetch(path, options = {}) {
 // longer write to users/scores (see supabase/lockdown_writes.sql).
 async function submitScore(name, wrongCount, elapsedMs) {
   const playerId = getPlayerId();
+  const sessionPlausible = isSessionPlausible(elapsedMs);
   const res = await fetch(`${SUPABASE_URL}/functions/v1/submit-score`, {
     method: 'POST',
     headers: {
@@ -44,7 +45,7 @@ async function submitScore(name, wrongCount, elapsedMs) {
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(buildSubmitScorePayload(playerId, name, wrongCount, elapsedMs)),
+    body: JSON.stringify(buildSubmitScorePayload(playerId, name, wrongCount, elapsedMs, sessionPlausible)),
   });
 
   const data = await res.json().catch(() => ({}));
@@ -74,6 +75,18 @@ async function fetchWeeklyLeaderboard(weeksAgo) {
 
 const phraseObj = getTodayPhrase();
 const { phrase, category, tier } = phraseObj;
+
+const phraseRequestBaseline = getPhraseRequestCount();
+
+// Deliberately generous lower bound so a genuinely fast/lucky player is
+// never affected by this.
+const MIN_SOLVE_MS_PER_LETTER = 250;
+
+function isSessionPlausible(elapsedMs) {
+  if (getPhraseRequestCount() > phraseRequestBaseline) return false;
+  if (!state.won) return true;
+  return elapsedMs >= getLetterSet(phrase).size * MIN_SOLVE_MS_PER_LETTER;
+}
 
 document.getElementById('hint-category').textContent = category;
 const diffEl = document.getElementById('hint-difficulty');

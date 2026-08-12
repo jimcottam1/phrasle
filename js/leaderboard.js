@@ -21,14 +21,18 @@ export function escapeHtml(str) {
  * leaderboard view (which is local-date-based) asks for, and it silently
  * never appears. It's an offset, not an arbitrary date, so the function can
  * still bound it to real-world values rather than trusting it blindly.
+ *
+ * sessionPlausible is stored alongside the score either way — it's never a
+ * reason by itself to reject a submission. See js/main.js for how it's set.
  */
-export function buildSubmitScorePayload(playerId, name, wrongCount, elapsedMs) {
+export function buildSubmitScorePayload(playerId, name, wrongCount, elapsedMs, sessionPlausible = true) {
   return {
     playerId,
     name: resolveDisplayName(name),
     wrongCount,
     elapsedMs: Math.round(elapsedMs),
     timezoneOffsetMinutes: new Date().getTimezoneOffset(),
+    sessionPlausible: Boolean(sessionPlausible),
   };
 }
 
