@@ -232,11 +232,21 @@ function stopTimerTicking() {
 document.addEventListener('visibilitychange', () => {
   if (state.gameOver) return;
   if (document.hidden) {
+    // Persist here, not just pauseTimer(), since a refresh or tab close
+    // can follow immediately and nothing else saves elapsedMs mid-game.
     pauseTimer();
+    persist();
   } else {
     state.activeSince = Date.now();
     updateTimerDisplay();
   }
+});
+
+// Belt-and-braces for refresh/close: visibilitychange fires first in most
+// browsers, but pagehide guarantees elapsedMs is saved either way.
+window.addEventListener('pagehide', () => {
+  if (state.gameOver) return;
+  persist();
 });
 
 // ---------------------------------------------------------------------------
