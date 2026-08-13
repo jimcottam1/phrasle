@@ -46,10 +46,9 @@ export function formatDuration(ms) {
 }
 
 export function buildShareText(phraseObj, wrongCount, won, dateStr, elapsedMs) {
-  const pattern = phraseObj.phrase.split(' ').map(w => '□'.repeat(w.length)).join('  ');
   const result  = won ? `✅ Solved — ${wrongCount} wrong guess${wrongCount !== 1 ? 'es' : ''}` : `❌ Too many wrong guesses`;
   const timeLine = elapsedMs != null ? `⏱️ ${formatDuration(elapsedMs)}\n` : '';
-  return `Phrasle ${dateStr} — ${phraseObj.category}\n${pattern}\n${result}\n${timeLine}Play today's Phrasle! https://jimcottam1.github.io/phrasle/`;
+  return `Phrasle ${dateStr} — ${phraseObj.category}\n${result}\n${timeLine}Play today's Phrasle! https://jimcottam1.github.io/phrasle/`;
 }
 
 // ---------------------------------------------------------------------------

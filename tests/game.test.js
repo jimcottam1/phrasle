@@ -155,12 +155,8 @@ describe('buildShareText', () => {
     expect(buildShareText(phraseObj, 2, true, '21 Jun')).not.toContain('BITE THE BULLET');
   });
 
-  it('includes a word-length pattern instead', () => {
-    // BITE=4, THE=3, BULLET=6 → □□□□  □□□  □□□□□□
-    const text = buildShareText(phraseObj, 2, true, '21 Jun');
-    expect(text).toContain('□□□□');
-    expect(text).toContain('□□□');
-    expect(text).toContain('□□□□□□');
+  it('does not include a word-length pattern', () => {
+    expect(buildShareText(phraseObj, 2, true, '21 Jun')).not.toContain('□');
   });
 
   it('includes the category', () => {
