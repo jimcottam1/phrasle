@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
     return json({ error: 'invalid_json' }, 400);
   }
 
-  const { playerId, name, wrongCount, elapsedMs, timezoneOffsetMinutes } = body;
+  const { playerId, name, wrongCount, elapsedMs, timezoneOffsetMinutes, sessionPlausible } = body;
 
   if (typeof playerId !== 'string' || !UUID_RE.test(playerId)) {
     return json({ error: 'invalid_player_id' }, 400);
@@ -112,10 +112,20 @@ Deno.serve(async (req) => {
     .upsert({ id: playerId, name: trimmedName }, { onConflict: 'id' });
   if (userError) return json({ error: 'db_error', detail: userError.message }, 500);
 
+  // sessionPlausible is a self-reported cheat-detection signal from
+  // js/main.js's isSessionPlausible() (named blandly on purpose — it's not
+  // exposed to players, but it is visible in the shipped JS and the
+  // request body, so it shouldn't announce what it's for). It flags rows
+  // for manual review; it's never a reason to reject the submission.
+  // Coerced defensively — only an explicit `false` marks a row, same as
+  // any other client input in this body.
   const { error: scoreError } = await supabase
     .from('scores')
     .upsert(
-      { date, player_id: playerId, wrong_count: wrongCount, elapsed_ms: Math.round(elapsedMs) },
+      {
+        date, player_id: playerId, wrong_count: wrongCount, elapsed_ms: Math.round(elapsedMs),
+        session_plausible: sessionPlausible !== false,
+      },
       { onConflict: 'date,player_id' },
     );
   if (scoreError) return json({ error: 'db_error', detail: scoreError.message }, 500);

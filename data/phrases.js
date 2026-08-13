@@ -495,7 +495,14 @@ const EASY_SLOT_IDX  = [0, 1, -1, 2, -1]; // which easy phrase to use at each pa
 // Day 0 = 2026-06-29.
 const EPOCH = new Date('2026-06-29T00:00:00');
 
+// Bumped on every call. Exposed via getPhraseRequestCount() below, which
+// js/main.js reads alongside a couple of other lightweight checks before a
+// score is submitted.
+let requests = 0;
+
 export function getTodayPhrase() {
+  requests++;
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const epoch = new Date(EPOCH);
@@ -510,4 +517,9 @@ export function getTodayPhrase() {
                : tier === 'medium' ? MEDIUM[cycle % MEDIUM.length]
                :                     HARD[cycle % HARD.length];
   return { ...phrase, tier: tier.charAt(0).toUpperCase() + tier.slice(1) };
+}
+
+/** How many times getTodayPhrase() has been called so far this page load. */
+export function getPhraseRequestCount() {
+  return requests;
 }

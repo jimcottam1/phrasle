@@ -77,6 +77,14 @@ describe('buildSubmitScorePayload', () => {
   it('rounds a fractional elapsed time to the nearest millisecond', () => {
     expect(buildSubmitScorePayload('abc-123', 'Jim', 0, 1234.7).elapsedMs).toBe(1235);
   });
+
+  it('defaults sessionPlausible to true when not given', () => {
+    expect(buildSubmitScorePayload('abc-123', 'Jim', 0, 1000).sessionPlausible).toBe(true);
+  });
+
+  it('carries an explicit false sessionPlausible through as a real boolean', () => {
+    expect(buildSubmitScorePayload('abc-123', 'Jim', 0, 1000, false).sessionPlausible).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------

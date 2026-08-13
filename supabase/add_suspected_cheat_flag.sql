@@ -1,0 +1,21 @@
+-- Run this in the Supabase SQL editor after deploying the updated
+-- submit-score Edge Function. Adds a cheat-detection flag the function now
+-- sets on every write (defaulting to true — plausible/not flagged — for
+-- existing rows) based on client-reported signals: data/phrases.js's
+-- getTodayPhrase() being called more than once in a page session
+-- (something outside the game asked for the answer directly), or a
+-- 0-wrong win finishing faster than is physically possible to click
+-- through by hand. false means flagged as implausible.
+--
+-- Named session_plausible, not suspected_cheat/is_cheater, because the
+-- value it's read from (js/main.js's isSessionPlausible()) ships in plain
+-- JS to every player, and the field travels over the wire in the
+-- submit-score request body — anyone in DevTools can see both, so the
+-- naming deliberately doesn't announce what it's for.
+--
+-- This never blocks a submission — see submit-score/index.ts. It's a
+-- signal for the leaderboard owner to review, not an auto-reject: both
+-- checks are computed and self-reported by the same client being flagged,
+-- so a determined cheater forging the raw API request can unset this too.
+
+alter table scores add column if not exists session_plausible boolean not null default true;
