@@ -5,6 +5,7 @@
 // the score bounds are validated before writing with the service-role key.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { Filter } from 'npm:bad-words@4';
+import { cleardownCutoffDate } from './scoreCleardown.ts';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -119,6 +120,18 @@ Deno.serve(async (req) => {
       { onConflict: 'date,player_id' },
     );
   if (scoreError) return json({ error: 'db_error', detail: scoreError.message }, 500);
+
+  // Rolling 2-week retention: every successful submission also clears out
+  // anything older, so the scores table never needs a separate cron job.
+  // Best-effort — a cleanup failure shouldn't fail the score that was just
+  // recorded, so it's logged rather than surfaced to the player.
+  const { error: cleardownError } = await supabase
+    .from('scores')
+    .delete()
+    .lt('date', cleardownCutoffDate());
+  if (cleardownError) {
+    console.error('score cleardown failed', cleardownError.message);
+  }
 
   return json({ ok: true });
 });

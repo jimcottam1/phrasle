@@ -82,6 +82,23 @@ diffEl.className = `hint-difficulty hint-difficulty--${tier.toLowerCase()}`;
 document.getElementById('hint-date').textContent =
   new Date().toLocaleDateString('en-IE', { weekday: 'long', day: 'numeric', month: 'long' });
 
+// Greets a returning, opted-in player by name in the header. Re-run whenever
+// opt-in status, the name, or the game's finished-for-today status changes
+// (join, rename, leave, game just ended) — "best of luck" reads oddly once
+// they've already played, so it switches to a wrap-up line for that case.
+function updateHeaderGreeting() {
+  const greeting = document.getElementById('header-greeting');
+  const name = getPlayerName();
+  if (getLeaderboardOptIn() === true && name) {
+    greeting.textContent = state.gameOver
+      ? `Hi ${name} 👋 — nice game today!`
+      : `Hi ${name} 👋 — best of luck!`;
+    greeting.hidden = false;
+  } else {
+    greeting.hidden = true;
+  }
+}
+
 let state = {
   guessedLetters: new Set(),
   wrongCount: 0,
@@ -124,6 +141,7 @@ if (saved?.phrase === phrase) {
   }
 }
 
+updateHeaderGreeting();
 updateTimerDisplay();
 if (!state.gameOver) startTimerTicking();
 
@@ -327,6 +345,7 @@ function endGame() {
   pauseTimer();
   stopTimerTicking();
   updateTimerDisplay();
+  updateHeaderGreeting();
 
   // Reveal all tiles on loss
   if (!state.won) {
@@ -468,11 +487,13 @@ document.getElementById('btn-optin-yes').addEventListener('click', async () => {
 
   setPlayerName(name);
   setLeaderboardOptIn(true);
+  updateHeaderGreeting();
   closeModal('modal-optin');
 });
 
 document.getElementById('btn-optin-no').addEventListener('click', () => {
   setLeaderboardOptIn(false);
+  updateHeaderGreeting();
   closeModal('modal-optin');
 });
 
@@ -486,6 +507,7 @@ document.getElementById('close-leaderboard').addEventListener('click', () => clo
 
 document.getElementById('btn-leaderboard-optout').addEventListener('click', () => {
   setLeaderboardOptIn(false);
+  updateHeaderGreeting();
   closeModal('modal-leaderboard');
   showToast("You're off the leaderboard — past scores stay, nothing new gets posted");
 });

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { getTodayPhrase } from '../data/phrases.js';
-import { getLetterSet } from '../js/game.js';
+import { getLetterSet, todayKey } from '../js/game.js';
 
 // ---------------------------------------------------------------------------
 // Drives the actual DOM (index.html) + main.js bootstrap, with fetch mocked,
@@ -77,6 +77,9 @@ describe('leaderboard flow (integration)', () => {
     const { phrase } = getTodayPhrase();
     await importMain();
 
+    // Not opted in yet -> no header greeting.
+    expect(document.getElementById('header-greeting').hidden).toBe(true);
+
     await playToWin(phrase);
 
     // 1. Never asked before -> opt-in modal appears.
@@ -90,6 +93,10 @@ describe('leaderboard flow (integration)', () => {
 
     expect(document.getElementById('modal-optin').hidden).toBe(true);
     expect(localStorage.getItem('phrasle_leaderboard_optin')).toBe('true');
+
+    // Opted in -> header greets the player by name.
+    expect(document.getElementById('header-greeting').hidden).toBe(false);
+    expect(document.getElementById('header-greeting').textContent).toContain('Jim');
 
     // 3. One POST to the Edge Function — not a direct table insert — with
     // the right auth header and body shape.
@@ -130,6 +137,9 @@ describe('leaderboard flow (integration)', () => {
     click('btn-leaderboard-optout');
     expect(localStorage.getItem('phrasle_leaderboard_optin')).toBe('false');
     expect(document.getElementById('modal-leaderboard').hidden).toBe(true);
+
+    // Header greeting disappears once opted out.
+    expect(document.getElementById('header-greeting').hidden).toBe(true);
 
     // 8. Reopening shows the "join" button instead, since we're now opted out.
     click('btn-leaderboard');
@@ -196,6 +206,41 @@ describe('leaderboard flow (integration)', () => {
     expect(document.getElementById('modal-optin').hidden).toBe(true);
     expect(localStorage.getItem('phrasle_leaderboard_optin')).toBe('true');
     expect(localStorage.getItem('phrasle_player_name')).toBe('Jim');
+  });
+
+  it('greets with "best of luck" before playing and switches to a wrap-up line once today\'s game is over', async () => {
+    const { phrase } = getTodayPhrase();
+
+    // Already opted in from a previous day, game not yet played today.
+    localStorage.setItem('phrasle_leaderboard_optin', 'true');
+    localStorage.setItem('phrasle_player_name', 'Jim');
+    await importMain();
+
+    const greeting = document.getElementById('header-greeting');
+    expect(greeting.hidden).toBe(false);
+    expect(greeting.textContent).toContain('best of luck');
+
+    await playToWin(phrase);
+
+    expect(greeting.hidden).toBe(false);
+    expect(greeting.textContent).toContain('nice game today');
+    expect(greeting.textContent).not.toContain('best of luck');
+  });
+
+  it('shows the wrap-up greeting on reload when today\'s game was already finished', async () => {
+    const { phrase } = getTodayPhrase();
+
+    localStorage.setItem('phrasle_leaderboard_optin', 'true');
+    localStorage.setItem('phrasle_player_name', 'Jim');
+    localStorage.setItem('phrasle_state', JSON.stringify({
+      phrase, guessedLetters: [...getLetterSet(phrase)], wrongCount: 0,
+      won: true, gameOver: true, elapsedMs: 12000, shareText: 'x', date: todayKey(),
+    }));
+    await importMain();
+
+    const greeting = document.getElementById('header-greeting');
+    expect(greeting.hidden).toBe(false);
+    expect(greeting.textContent).toContain('nice game today');
   });
 });
 
